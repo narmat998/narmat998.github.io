@@ -18,6 +18,26 @@ let stage;
 let swordSprite;
 let swordSwing;
 
+//outfits
+let blueShirt;
+let bluePants;
+let blackPants;
+let blueOnBlue;
+let blazer;
+let suit;
+let outfit;
+
+//outfits with hair
+let blueShirtHair1;
+let bluePantsHair1;
+let blackPantsHair1;
+let blueOnBlueHair1;
+let blazerhair1;
+let suitHair1;
+
+//base characetr
+let baseCharacter;
+
 async function setup() {
   createCanvas(windowWidth, windowHeight);;
   noStroke();
@@ -27,8 +47,27 @@ async function setup() {
   x = width/2;
   y = height*2/3;
 
+
+  //ALL SPRITES GO HERE!!! DONT LOSE THEM
   swordSprite = await loadImage("sword.png");
   swordSwing = await loadImage("sword_swipe.png");
+
+  blueShirt = await loadImage("blue_shirt_no_pants.png");
+  bluePants = await loadImage("no_shirt_blue_pants.png");
+  blueOnBlue = await loadImage("blue_shirt_blue_pants.png");
+  blackPants = await loadImage("no_shirt_black_pants.png");
+  blazer = await loadImage("blazer_no_pants.png");
+  suit = await loadImage("full_suit.png");
+
+  blueShirtHair1 = await loadImage('blue_shirt_no_pants_hair1.png');
+  bluePantsHair1 = await loadImage("no_shirt_blue_pants_hair1.png");
+  blackPantsHair1 = await loadImage("blue_shirt_blue_pants_hair1.png");
+  blueOnBlueHair1 = await loadImage("no_shirt_black_pants_hair1.png");
+  blazerhair1 = = await loadImage("blazer_no_pants.png");
+  suitHair1
+
+  baseCharacter = await loadImage("no_pants_no_shirt_(og).png");
+
 
 }
 
@@ -37,12 +76,12 @@ function draw() {
   checkStage();
   makeCharacter();
   moveCharacter();
+  makeSword();
   stageTransitions();
 }
 
 function makeCharacter() {
-  fill('blue');
-  rect(x, y, 30, 60);
+  image(baseCharacter, x-200, y-200, 400, 400);
 }
 
 
@@ -129,4 +168,8 @@ function stageTransitions() {
       y = height;
     }
   } 
+}
+
+function makeSword() {
+  image(swordSprite, x - 110, y - 130, 240, 260);
 }
