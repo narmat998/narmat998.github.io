@@ -63,12 +63,12 @@ async function setup() {
   bluePantsHair1 = await loadImage("no_shirt_blue_pants_hair1.png");
   blackPantsHair1 = await loadImage("blue_shirt_blue_pants_hair1.png");
   blueOnBlueHair1 = await loadImage("no_shirt_black_pants_hair1.png");
-  blazerhair1 = = await loadImage("blazer_no_pants.png");
-  suitHair1
+  blazerhair1 = await loadImage("blazer_no_pants.png");
+  suitHair1 = await loadImage("full_suit_hair1.png");
 
   baseCharacter = await loadImage("no_pants_no_shirt_(og).png");
 
-
+  outfit = suitHair1;
 }
 
 function draw() {
@@ -81,7 +81,7 @@ function draw() {
 }
 
 function makeCharacter() {
-  image(baseCharacter, x-200, y-200, 400, 400);
+  image(outfit, x-200, y-200, 400, 400);
 }
 
 
