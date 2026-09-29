@@ -15,9 +15,6 @@ let speed;
 
 let stage;
 
-let swordSprite;
-let swordSwing;
-
 //outfits
 let blueShirt;
 let bluePants;
@@ -49,9 +46,6 @@ async function setup() {
 
 
   //ALL SPRITES GO HERE!!! DONT LOSE THEM
-  swordSprite = await loadImage("sword.png");
-  swordSwing = await loadImage("sword_swipe.png");
-
   blueShirt = await loadImage("blue_shirt_no_pants.png");
   bluePants = await loadImage("no_shirt_blue_pants.png");
   blueOnBlue = await loadImage("blue_shirt_blue_pants.png");
@@ -61,14 +55,21 @@ async function setup() {
 
   blueShirtHair1 = await loadImage('blue_shirt_no_pants_hair1.png');
   bluePantsHair1 = await loadImage("no_shirt_blue_pants_hair1.png");
-  blackPantsHair1 = await loadImage("blue_shirt_blue_pants_hair1.png");
-  blueOnBlueHair1 = await loadImage("no_shirt_black_pants_hair1.png");
+  blackPantsHair1 = await loadImage("no_shirt_black_pants_hair1.png");
+  blueOnBlueHair1 = await loadImage("blue_shirt_blue_pants_hair1.png");
   blazerhair1 = await loadImage("blazer_no_pants.png");
   suitHair1 = await loadImage("full_suit_hair1.png");
 
+  blueShirtSprite = await loadImage('BLUESHIRT.png');
+  bluePantsSprite = await loadImage('BLUEPANTS.png');
+  blackPantsSprite = await loadImage('BLACKPANTS.png');
+  blazerSprite = await loadImage('BLAZER.png');
+  hairSprite = await loadImage('HAIR.png');
+
+
   baseCharacter = await loadImage("no_pants_no_shirt_(og).png");
 
-  outfit = suitHair1;
+  outfit = baseCharacter;
 }
 
 function draw() {
@@ -76,8 +77,8 @@ function draw() {
   checkStage();
   makeCharacter();
   moveCharacter();
-  makeSword();
   stageTransitions();
+  makeClothes();
 }
 
 function makeCharacter() {
@@ -170,6 +171,21 @@ function stageTransitions() {
   } 
 }
 
-function makeSword() {
-  image(swordSprite, x - 110, y - 130, 240, 260);
+function makeClothes() {
+  if (stage === 2) {
+    image(hairSprite, 100, 500, 200, 200);
+  }
+  if (stage === 1) {
+    image(blueShirtSprite, 600, 400, 200, 200);
+  }
+  if (stage === 4) {
+    image(bluePantsSprite, 200, 800, 200, 200);
+  }
+  if (stage === 3) {
+    image(blackPantsSprite, 700, 100, 200, 200);
+  }
+  if (stage === 5) {
+    image(blazerSprite, 500, 500, 200, 200);
+  }
+
 }
