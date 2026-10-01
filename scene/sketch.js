@@ -29,11 +29,18 @@ let blueShirtHair1;
 let bluePantsHair1;
 let blackPantsHair1;
 let blueOnBlueHair1;
-let blazerhair1;
+let blazerHair1;
 let suitHair1;
+let onlyHair1;
 
 //base characetr
 let baseCharacter;
+
+let hair = 'show';
+let shirt = 'show';
+let bluePantsDisplayer = 'show';
+let blackPantsDisplayer = 'show';
+let blazerDisplayer = 'show';
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);;
@@ -55,9 +62,10 @@ async function setup() {
 
   blueShirtHair1 = await loadImage('blue_shirt_no_pants_hair1.png');
   bluePantsHair1 = await loadImage("no_shirt_blue_pants_hair1.png");
+  onlyHair1 = await loadImage('no_shirt_no_pants_hair1.png');
   blackPantsHair1 = await loadImage("no_shirt_black_pants_hair1.png");
   blueOnBlueHair1 = await loadImage("blue_shirt_blue_pants_hair1.png");
-  blazerhair1 = await loadImage("blazer_no_pants.png");
+  blazerHair1 = await loadImage("blazer_hair1.png");
   suitHair1 = await loadImage("full_suit_hair1.png");
 
   blueShirtSprite = await loadImage('BLUESHIRT.png');
@@ -74,11 +82,11 @@ async function setup() {
 
 function draw() {
   
+  stageTransitions();
   checkStage();
+  makeClothes();
   makeCharacter();
   moveCharacter();
-  stageTransitions();
-  makeClothes();
 }
 
 function makeCharacter() {
@@ -102,11 +110,6 @@ function moveCharacter() {
   }
 }
 
-function keyPressed(){
-  if (key === 'g') {
-    
-  }
-}
 
 function checkStage() {
   if (stage === 1) {
@@ -172,20 +175,129 @@ function stageTransitions() {
 }
 
 function makeClothes() {
-  if (stage === 2) {
+  if (stage === 2 && hair === 'show') {
     image(hairSprite, 100, 500, 200, 200);
   }
-  if (stage === 1) {
+  if (stage === 1 && shirt === 'show') {
     image(blueShirtSprite, 600, 400, 200, 200);
   }
-  if (stage === 4) {
+  if (stage === 4 && bluePantsDisplayer === 'show') {
     image(bluePantsSprite, 200, 800, 200, 200);
   }
-  if (stage === 3) {
+  if (stage === 3 && blackPantsDisplayer === 'show') {
     image(blackPantsSprite, 700, 100, 200, 200);
   }
-  if (stage === 5) {
+  if (stage === 5 && blazerDisplayer === 'show') {
     image(blazerSprite, 500, 500, 200, 200);
   }
+}
 
+
+function keyPressed(){
+  if (key === 'e') {
+    if (stage === 1 && x >= 600 && x <= 800 && y >= 400 && y <= 600 && shirt === 'show') {
+      if (outfit === baseCharacter) {
+        outfit = blueShirt;
+        shirt = 'hide';
+      }
+      else if (outfit === onlyHair1) {
+        outfit = blueShirtHair1;
+        shirt = 'hide';
+      }
+      else if (outfit === bluePants) {
+        outfit = blueOnBlue;
+        shirt = 'hide';
+      }
+      else if (outfit === bluePantsHair1) {
+        outfit = blueOnBlueHair1;
+        shirt = 'hide';
+      }
+    }
+    if (stage === 2 && x >= 100 && x <= 300 && y>= 500 && y <= 700 && hair === 'show') {
+      hair = 'hide';
+      if (outfit === baseCharacter) {
+        outfit = onlyHair1;
+      }
+      else if (outfit === suit) {
+        outfit = suitHair1;
+      }
+      else if (outfit === blazer) {
+        outfit = blazerHair1;
+      }
+      else if (outfit === blueOnBlue) {
+        outfit = blueOnBlueHair1;
+      }
+      else if (outfit === blackPants) {
+        outfit = blackPantsHair1;
+      }
+      else if (outfit === bluePants) {
+        outfit = bluePantsHair1;
+      }
+      else if (outfit === blueShirt) {
+        outfit = blueShirtHair1;
+      }
+    }
+    if (stage === 3 && x >= 700 && x <= 900 && y>= 100 && y <= 300 && blackPantsDisplayer === 'show') {
+      if (outfit === baseCharacter) {
+        outfit = blackPants;
+        blackPantsDisplayer = 'hide';
+      }
+      else if (outfit === onlyHair1) {
+        outfit = blackPantsHair1;
+        blackPantsDisplayer = 'hide';
+      }
+      else if (outfit === blazer) {
+        outfit = suit;
+        blackPantsDisplayer = 'hide';
+      }
+      else if (outfit === blazerHair1) {
+        outfit = suitHair1;
+        blackPantsDisplayer = 'hide';
+      }
+    }
+    if (stage === 4 && x >= 200 && x <= 400 && y>= 800 && y <= 1000 && bluePantsDisplayer === 'show') {
+      if (outfit === baseCharacter) {
+        outfit = bluePants;
+        bluePantsDisplayer = 'hide';
+      }
+      else if (outfit === onlyHair1) {
+        outfit = bluePantsHair1;
+        bluePantsDisplayer = 'hide';
+      }
+      else if (outfit === blueShirt) {
+        outfit = blueOnBlue;
+        bluePantsDisplayer = 'hide';
+      }
+      else if (outfit === blueShirtHair1) {
+        outfit = blueOnBlueHair1;
+        bluePantsDisplayer = 'hide';
+      }
+    }
+    if (stage === 5 && x >= 500 && x <= 700 && y>= 500 && y <= 700 && blazerDisplayer === 'show') {
+      if (outfit === baseCharacter) {
+        outfit = blazer;
+        blazerDisplayer = 'hide';
+      }
+      else if (outfit === blackPants) {
+        outfit = suit;
+        blazerDisplayer = 'hide';
+      }
+      else if (outfit === blackPantsHair1) {
+        outfit = suitHair1;
+        blazerDisplayer = 'hide';
+      }
+      else if (outfit === onlyHair1) {
+        outfit = blazerHair1;
+        blazerDisplayer = 'hide';
+      }
+    }
+  }
+  if (key === 'r') {
+    outfit = baseCharacter;
+    shirt = 'show';
+    hair = 'show';
+    blackPantsDisplayer = 'show';
+    bluePantsDisplayer = 'show';
+    blazerDisplayer = 'show';
+  }
 }
