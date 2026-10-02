@@ -5,6 +5,7 @@
 // Extra for Experts:
 // I used many sprites, and while somewhat inneficient, made specific outfits for each clothing item when equipped with others. 
 // You cannot wear blue and black together, as they don't match, and you traverse the different "stages" to find all the clothes.
+// The screen also scales along with the sprites and the variables.
 
 let x;
 let y;
