@@ -1,53 +1,49 @@
 //Square moving around edge of screen
 
+let x = 0;
+let y = 0;
 let speed = 10;
-let squareSize = 300;
-let x;
-let y;
-let side;
+let size = 300;
+let state = "right";
+
 async function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  x = 0;
-  y = 0;
-  side = "top";
 }
 
 function draw() {
-  background(255);
+  background(220);
   move();
   display();
 }
 
 function move() {
-  if (side === "top") {
+  if (state === 'right') {
     x += speed;
-    if (x>= width - squareSize) {
-      side = "right";
+    if (x >= width - size) {
+      state = 'down';
     }
   }
-  else if (side === "right") {
+  else if (state === 'down') {
     y += speed;
-    if (y>= height - squareSize) {
-      side = "bottom";
+    if (y >= height - size) {
+      state = 'left';
     }
   }
-  else if (side === "bottom") {
+  else if (state === 'left') {
     x -= speed;
-    if (x<= width - squareSize) {
-      side = "left";
+    if (x <= 0) {
+      state = 'up';
     }
   }
-  else if (side === "left") {
+  else if (state === 'up') {
     y -= speed;
-    if (y>= height - squareSize) {
-      side = "top";
+    if (y <= 0) {
+      state = 'right';
     }
   }
-
 }
 
 function display() {
-  fill(0);
-  rect(x, y, squareSize, squareSize);
+  fill("black");
+  square(x, y, size);
 }

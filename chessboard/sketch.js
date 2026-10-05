@@ -2,36 +2,34 @@ let space;
 let dimensions;
 
 function setup() {
-  if (windowWidth > windowHeight){
+  //make the largest square you can...
+  if (windowWidth > windowHeight) {
     createCanvas(windowHeight, windowHeight);
-    dimensions = windowHeight;
   }
   else {
     createCanvas(windowWidth, windowWidth);
-    dimensions = windowWidth;
   }
-  
-  noStroke()
-  space = dimensions/8;
-  x = 0;
 }
 
 function draw() {
-  background('white');
-  chessboard()
+  background(220);
+  drawChessboard();
 }
 
-function chessboard() {
+function drawChessboard() {
   let size = width/8;
-  for (let x = 0, x < 8, x++) {
-     for (let y = 0, y < 8, y++)
-  }
-  rect('')
-  for (let x = 0; x <= dimensions; x += dimensions/4) {
-    for (let y = dimensions/8; y <= dimensions; y += dimensions/4) {
-      fill(0);
-      rect(x, y, space, space);
-      rect(x + dimensions/8, y - dimensions/8, space, space);
+  let isWhite = true;
+  for (let x=0; x<8; x++) {
+    for (let y=0; y<8; y++) {
+      if (isWhite) {
+        fill("white");
+      }
+      else {
+        fill("black");
+      }
+      square(x*size, y*size, size);
+      isWhite = !isWhite;
     }
+    isWhite = !isWhite;
   }
 }
