@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-
+//comment as you go so you dont lose your mind
 let terrain = [];
 const NUMBER_RECTS = 2000;
 
@@ -23,6 +23,18 @@ function draw() {
   for (let theRect of terrain) {
     rect(theRect.x, theRect.y, theRect.w, theRect.h);
   }
+
+  PlayerOnTerrain();
+  push();
+  translate(player.x + player.w/2, player.y + player.h/2);
+
+  rotate(player.angle);
+
+  rectMode(CENTER);
+  fill('black');
+  rect(0, 0, player.w, player.h);
+  rectMode(CORNER);
+  pop();
 }
 
 function generateTerrain() {
@@ -46,4 +58,34 @@ function spawnRectangle(leftSide, rectWidth, rectHeight) {
   };
 
   return theRect;
+}
+
+let player = {
+  x: 100,
+  y: 100,
+  w: 300,
+  h: 100,
+  angle: 0,
+};
+
+function getTerrainY(x) {
+  let i = Math.floor(x/(width/NUMBER_RECTS));
+  i = constrain(i, 0, terrain.length - 1);
+
+  return terrain[i].y;
+}
+
+
+function PlayerOnTerrain() {
+
+  let leftX = player.x;
+  let rightX = player.x + player.w;
+  let leftY = getTerrainY(leftX);
+  let rightY = getTerrainY(rightX);
+
+  //find the angle in radians of the point to the x axis 
+  player.angle = Math.atan2(rightY - leftY, rightX - leftX);
+
+  //put the player in the centre of the y points
+  player.y = (leftY + rightY) / 2 - player.h;
 }
