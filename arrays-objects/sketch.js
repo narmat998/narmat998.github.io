@@ -9,9 +9,13 @@
 let terrain = [];
 const NUMBER_RECTS = 2000;
 
+
+let speed = 3;
+
 async function setup() {
   createCanvas(windowWidth, windowHeight);
   generateTerrain();
+  rectMode(CORNER);
 }
 
 function draw() {
@@ -24,17 +28,9 @@ function draw() {
     rect(theRect.x, theRect.y, theRect.w, theRect.h);
   }
 
-  PlayerOnTerrain();
-  push();
-  translate(player.x + player.w/2, player.y + player.h/2);
-
-  rotate(player.angle);
-
-  rectMode(CENTER);
-  fill('black');
-  rect(0, 0, player.w, player.h);
-  rectMode(CORNER);
-  pop();
+  tankOnTerrain(tankBlue);
+  tankOnTerrain(tankRed);
+  moveTanks();
 }
 
 function generateTerrain() {
@@ -60,11 +56,19 @@ function spawnRectangle(leftSide, rectWidth, rectHeight) {
   return theRect;
 }
 
-let player = {
+let tankBlue = {
   x: 100,
   y: 100,
-  w: 300,
-  h: 100,
+  w: 50,
+  h: 25,
+  angle: 0,
+};
+
+let tankRed = {
+  x: 400,
+  y: 100,
+  w: 50,
+  h: 25,
   angle: 0,
 };
 
@@ -75,17 +79,61 @@ function getTerrainY(x) {
   return terrain[i].y;
 }
 
+function tankOnTerrain(tank) {
+  //use left corner as left x and right corner as right x
+  let leftX = tank.x;
+  let rightX = tank.x + tank.w;
 
-function PlayerOnTerrain() {
-
-  let leftX = player.x;
-  let rightX = player.x + player.w;
+  //get y value at x positions
   let leftY = getTerrainY(leftX);
   let rightY = getTerrainY(rightX);
 
-  //find the angle in radians of the point to the x axis 
-  player.angle = Math.atan2(rightY - leftY, rightX - leftX);
+  //find tank angle with the two y values
+  tank.angle = Math.atan2(rightY - leftY, rightX - leftX);
+  tank.y = (leftY + rightY) / 2 - tank.h;
 
-  //put the player in the centre of the y points
-  player.y = (leftY + rightY) / 2 - player.h;
+  //save current drawing
+  push();
+
+  // move to centre of tank
+  translate(
+    tank.x + tank.w / 2,
+    tank.y + tank.h / 2
+  );
+  rotate(tank.angle);
+
+  //draw tank
+  if (tank === tankBlue) {
+    fill('blue');
+  } 
+  else if (tank === tankRed) {
+    fill('red');
+  }
+
+  rect(-tank.w / 2, -tank.h / 2, tank.w, tank.h);
+  // restore last drawing 
+  pop();
+}
+
+function moveTanks() {
+  if (keyIsDown('d')) {
+    if (tankBlue.x < window.width - tankBlue.w) {
+      tankBlue.x += speed;
+    }
+  }
+  if (keyIsDown('a')) {
+    if (tankBlue.x > 0) {
+      tankBlue.x -= speed;
+    }
+  }
+  if (keyIsDown('l')) {
+    if (tankRed.x < window.width - tankRed.w) {
+      tankRed.x += speed;
+    }
+  }
+  if (keyIsDown('j')) {
+    if (tankRed.x > 0) {
+      tankRed.x -= speed;
+    }
+  }
 }
