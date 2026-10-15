@@ -23,7 +23,6 @@ function draw() {
 
   stroke('green');
   fill('green');
-
   for (let theRect of terrain) {
     rect(theRect.x, theRect.y, theRect.w, theRect.h);
   }
@@ -31,6 +30,7 @@ function draw() {
   tankOnTerrain(tankBlue);
   tankOnTerrain(tankRed);
   moveTanks();
+
 }
 
 function generateTerrain() {
@@ -137,3 +137,38 @@ function moveTanks() {
     }
   }
 }
+////////////
+// let parentRect = {
+//   x: 100,
+//   y: 100,
+//   w: 150,
+//   h: 100
+// };
+
+// // Child rectangle object (relative position)
+// let childRect = {
+//   offsetX: 20,
+//   offsetY: 30,
+//   w: 50,
+//   h: 30
+// };
+
+// function setup() {
+//   createCanvas(400, 400);
+// }
+
+// function draw() {
+//   background(220);
+
+//   // Draw parent rectangle
+//   rect(parentRect.x, parentRect.y, parentRect.w, parentRect.h);
+
+//   // Draw child rectangle relative to parent
+//   rect(parentRect.x + childRect.offsetX, parentRect.y + childRect.offsetY, childRect.w, childRect.h);
+// }
+
+// // Optional: Move parent with mouse
+// function mouseDragged() {
+//   parentRect.x = mouseX - parentRect.w / 2;
+//   parentRect.y = mouseY - parentRect.h / 2;
+// }
