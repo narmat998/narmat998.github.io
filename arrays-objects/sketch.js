@@ -31,6 +31,7 @@ function draw() {
   tankOnTerrain(tankRed);
   moveTanks();
 
+  moveBarrel();
 }
 
 function generateTerrain() {
@@ -62,10 +63,9 @@ let tankBlue = {
   w: 50,
   h: 25,
   angle: 0,
-  barrelX: 30,
-  barrelY: 20,
-  barrelW: 40,
-  barrelH: 60,
+  barrelW: 15,
+  barrelH: 40,
+  barrelAngle: 90,
 };
 
 let tankRed = {
@@ -74,10 +74,9 @@ let tankRed = {
   w: 50,
   h: 25,
   angle: 0,
-  barrelX: 30,
-  barrelY: 20,
-  barrelW: 40,
-  barrelH: 60,
+  barrelW: 15,
+  barrelH: 40,
+  barrelAngle: 90,
 };
 
 function getTerrainY(x) {
@@ -114,9 +113,13 @@ function tankOnTerrain(tank) {
   else if (tank === tankRed) {
     fill('red');
   }
-
+  push();
+  //make the tank barrel first so it sits behind the tank
+  rotate(tank.barrelAngle);
+  rect(0 - tank.w/6, 0 - tank.barrelH, tank.barrelW, tank.barrelH);
+  pop();
+  //make the tank 
   rect(-tank.w / 2, -tank.h / 2, tank.w, tank.h);
-  rect(0,tank.barrelH/2, tank.barrelH, tank.barrelW/2)
   // return the origin back
   pop();
 }
@@ -143,38 +146,12 @@ function moveTanks() {
     }
   }
 }
-////////////
-// let parentRect = {
-//   x: 100,
-//   y: 100,
-//   w: 150,
-//   h: 100
-// };
 
-// // Child rectangle object (relative position)
-// let childRect = {
-//   offsetX: 20,
-//   offsetY: 30,
-//   w: 50,
-//   h: 30
-// };
-
-// function setup() {
-//   createCanvas(400, 400);
-// }
-
-// function draw() {
-//   background(220);
-
-//   // Draw parent rectangle
-//   rect(parentRect.x, parentRect.y, parentRect.w, parentRect.h);
-
-//   // Draw child rectangle relative to parent
-//   rect(parentRect.x + childRect.offsetX, parentRect.y + childRect.offsetY, childRect.w, childRect.h);
-// }
-
-// // Optional: Move parent with mouse
-// function mouseDragged() {
-//   parentRect.x = mouseX - parentRect.w / 2;
-//   parentRect.y = mouseY - parentRect.h / 2;
-// }
+function moveBarrel() {
+  if (mouseX < width/2) {
+    tankRed.barrelAngle = -45;
+  }
+  else if (mouseX > width/2) {  
+    tankRed.barrelAngle = 45;
+  }
+}
