@@ -62,6 +62,10 @@ let tankBlue = {
   w: 50,
   h: 25,
   angle: 0,
+  barrelX: 30,
+  barrelY: 20,
+  barrelW: 40,
+  barrelH: 60,
 };
 
 let tankRed = {
@@ -70,6 +74,10 @@ let tankRed = {
   w: 50,
   h: 25,
   angle: 0,
+  barrelX: 30,
+  barrelY: 20,
+  barrelW: 40,
+  barrelH: 60,
 };
 
 function getTerrainY(x) {
@@ -92,14 +100,11 @@ function tankOnTerrain(tank) {
   tank.angle = Math.atan2(rightY - leftY, rightX - leftX);
   tank.y = (leftY + rightY) / 2 - tank.h;
 
-  //save current drawing
+  //make just the tank rotate
   push();
 
   // move to centre of tank
-  translate(
-    tank.x + tank.w / 2,
-    tank.y + tank.h / 2
-  );
+  translate(tank.x + tank.w / 2, tank.y + tank.h / 2);
   rotate(tank.angle);
 
   //draw tank
@@ -111,7 +116,8 @@ function tankOnTerrain(tank) {
   }
 
   rect(-tank.w / 2, -tank.h / 2, tank.w, tank.h);
-  // restore last drawing 
+  rect(tank.x + tank.barrelX, tank.y - tank.barrelY - tank.barrelH, tank.barrelH, tank.barrelW)
+  // return the origin back
   pop();
 }
 
