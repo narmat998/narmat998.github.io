@@ -36,12 +36,12 @@ function draw() {
 function generateTerrain() {
   let theWidth = width/NUMBER_RECTS;
   let time = 0;
-  let deltaTime = 0.001;
+  let changeTime = 0.001;
   for (let i = 0; i < NUMBER_RECTS; i++) {
     let theHeight = noise(time) * height;
     let someRect = spawnRectangle(theWidth * i, theWidth, theHeight);
     terrain.push(someRect);
-    time += deltaTime;
+    time += changeTime;
   }
 }
 
