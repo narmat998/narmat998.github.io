@@ -116,7 +116,7 @@ function tankOnTerrain(tank) {
   }
 
   rect(-tank.w / 2, -tank.h / 2, tank.w, tank.h);
-  rect(tank.x + tank.barrelX, tank.y - tank.barrelY - tank.barrelH, tank.barrelH, tank.barrelW)
+  rect(0,tank.barrelH/2, tank.barrelH, tank.barrelW/2)
   // return the origin back
   pop();
 }
