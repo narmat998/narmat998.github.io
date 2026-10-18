@@ -199,7 +199,7 @@ function drawTrajectory(tank) {
   let tankCenterX = tank.x + tank.w/2;
   let tankCenterY = tank.y + tank.h/2;
 
-  //calculate barrel angle to track the barrels x value
+  //calculate barrel angle to track the barrels x value to place end of parabola
   let angle = tank.angle + tank.barrelAngle;
 
   //go to end of the barrel
@@ -208,28 +208,29 @@ function drawTrajectory(tank) {
   //calculate how much the barrel points off of the vertical and finds the distance of the barrel length in the direction of the angle to move the start of the parabola to the tip of the barrel 
   let tankCenterX2 = tankCenterX + sin(angle) * barrelLength;
 
-  //calculate how much the barrel deviates while rotating and moves the bottom of the parabola to the tip of the barrel on the y axis
+  //calculate how much the barrels height moves while rotating and moves the bottom of the parabola to the tip of the barrel on the y axis
   let tankCenterY2 = tankCenterY - cos(angle) * barrelLength;
 
-  // Aim toward mouse
+  //aim towards the mouse
   let pointX = mouseX - tankCenterX2;
   let pointY = mouseY - tankCenterY2;
 
   let aimAngle = atan2(pointY, pointX);
 
-  let factorA = 10;
-  let PointX2 = cos(aimAngle) * factorA;
-  let PointY2 = map(pointY, 200, -200, 0, -10);
+  let pointX2 = cos(aimAngle) * 10;
+  let pointY2 = map(pointY, 500, -500, 0, -10);
 
   let drop = 0.4;
-
-  // Draw dotted trajectory
+  //draw the dots
   fill(50);
   noStroke();
 
-  for (let i = 2; i <= 30; i += 2) {
-    let x = tankCenterX2 + PointX2 * i;
-    let y = tankCenterY2 + PointY2 * i + 0.5 * drop * i * i;
+  for (let i = 2; i <= 50; i += 2) {
+    //y = pointX2(i) + tankCenterX2
+    let x = tankCenterX2 + pointX2 * i;
+
+    //y = 0.3(0.4)i^2 + pointY2(i) + tankCenterY2
+    let y = 0.3 * ((drop) * i * i)  + pointY2 * i + tankCenterY2;
 
     circle(x, y, 5);
   }
