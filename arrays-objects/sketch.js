@@ -15,6 +15,12 @@ let lastTurnTime = 0;
 let terrain = [];
 const NUMBER_RECTS = 2000;
 
+let shells = [];
+
+let shellSpeed = 1;
+let gravity = 0.2;
+let trajectoryDots = 50;
+
 let speed = 1;
 
 async function setup() {
@@ -39,6 +45,8 @@ function draw() {
   moveTanks();
 
   turnSelector();
+
+  updateShells();
 }
 
 function generateTerrain() {
@@ -151,26 +159,34 @@ function moveTanks() {
 }
 
 function moveBarrel(tank) {
-  let distance = mouseX - (tank.x + tank.w/2);
-  let angle = map(distance, -200, 200, -60, 60);
-  if (angle > 60) {
-    angle = 60;
+  let tankCenterX = tank.x + tank.w / 2;
+  let tankCenterY = tank.y + tank.h / 2;
+
+  //angle from tank to mouse
+  let dx = mouseX - tankCenterX;
+  let dy = mouseY - tankCenterY;
+  let angle = atan2(dy, dx);
+
+  tank.barrelAngle = angle - tank.angle + PI/2;
+  if (tank.barrelAngle > 60) {
+    tank.barrelAngle = 60;
   }
-  else if (angle < -60) {
-    angle = -60;
+  else if (tank.angle < -60) {
+    tank.barrelAngle = -60;
   }
+
   tank.barrelAngle = radians(angle);  
 }
 
 function turnSelector() {
   if (turn === 'blue') {
     drawTrajectory(tankBlue);
-      moveBarrel(tankBlue);
-    }
-    else if (turn === 'red') {
-      drawTrajectory(tankRed);
-      moveBarrel(tankRed);
-    }
+    moveBarrel(tankBlue);
+  }
+  else if (turn === 'red') {
+    drawTrajectory(tankRed);
+    moveBarrel(tankRed);
+  }
 
   if (millis() > turnTime + lastTurnTime) {
     lastTurnTime = millis();
@@ -187,51 +203,75 @@ function mousePressed() {
   if (turn === 'blue') {
     lastTurnTime = millis(); 
     turn = 'red';
-    }
+    fireShell(tankBlue);
+  }
   else if (turn === 'red') {
     lastTurnTime = millis();    
     turn = 'blue';
-    }
+    fireShell(tankRed);
+  }
 }
 
 
 function drawTrajectory(tank) {
-  let tankCenterX = tank.x + tank.w/2;
-  let tankCenterY = tank.y + tank.h/2;
+  let tankCenterX = tank.x + tank.w / 2;
+  let tankCenterY = tank.y + tank.h / 2;
 
-  //calculate barrel angle to track the barrels x value to place end of parabola
   let angle = tank.angle + tank.barrelAngle;
-
-  //go to end of the barrel
   let barrelLength = tank.barrelH;
 
-  //calculate how much the barrel points off of the vertical and finds the distance of the barrel length in the direction of the angle to move the start of the parabola to the tip of the barrel 
-  let tankCenterX2 = tankCenterX + sin(angle) * barrelLength;
+  // Start at the tip of the barrel
+  let startX = tankCenterX + sin(angle) * barrelLength;
+  let startY = tankCenterY - cos(angle) * barrelLength;
 
-  //calculate how much the barrels height moves while rotating and moves the bottom of the parabola to the tip of the barrel on the y axis
-  let tankCenterY2 = tankCenterY - cos(angle) * barrelLength;
+  // Calculate initial velocity
+  let velocityX = sin(angle) * shellSpeed;
+  let velocityY = -cos(angle) * shellSpeed;
 
-  //aim towards the mouse
-  let pointX = mouseX - tankCenterX2;
-  let pointY = mouseY - tankCenterY2;
-
-  let aimAngle = atan2(pointY, pointX);
-
-  let pointX2 = cos(aimAngle) * 10;
-  let pointY2 = map(pointY, 500, -500, 0, -10);
-
-  let drop = 0.4;
-  //draw the dots
   fill(50);
   noStroke();
 
-  for (let i = 2; i <= 50; i += 2) {
-    //y = pointX2(i) + tankCenterX2
-    let x = tankCenterX2 + pointX2 * i;
+  // Predict where the shell will be at each future frame
+  for (let t = 1; t <= trajectoryDots; t += 2) {
+    let x = startX + velocityX * t;
+    let y = startY + velocityY * t
+      + 0.5 * gravity * t * t;
 
-    //y = 0.3(0.4)i^2 + pointY2(i) + tankCenterY2
-    let y = 0.3 * ((drop) * i * i)  + pointY2 * i + tankCenterY2;
+    circle(x, y, 6);
+  }
+}
 
-    circle(x, y, 5);
+function fireShell(tank) {
+  let tankCenterX = tank.x + tank.w / 2;
+  let tankCenterY = tank.y + tank.h / 2;
+
+  let angle = tank.angle + tank.barrelAngle;
+  let barrelLength = tank.barrelH;
+
+  let startX = tankCenterX + sin(angle) * barrelLength;
+  let startY = tankCenterY - cos(angle) * barrelLength;
+
+  let tankShell = {
+    x: startX,
+    y: startY,
+    velocityX: sin(angle) * shellSpeed,
+    velocityY: -cos(angle) * shellSpeed,
+  };
+
+  shells.push(tankShell);
+}
+
+function updateShells() {
+  for (let i = 0; i < shells.length; i++) {
+
+    let tankShell = shells[i];
+    tankShell.x += tankShell.velocityX;
+    tankShell.y += tankShell.velocityY;
+
+    tankShell.velocityY += gravity;
+
+    fill('yellow');
+    noStroke();
+    circle(tankShell.x, tankShell.y, 10);
   }
 }
