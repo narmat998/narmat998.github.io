@@ -17,7 +17,7 @@ const NUMBER_RECTS = 2000;
 
 let shells = [];
 
-let shellSpeed = 1;
+let shellSpeed = 15;
 let gravity = 0.2;
 let trajectoryDots = 50;
 
@@ -168,24 +168,17 @@ function moveBarrel(tank) {
   let angle = atan2(dy, dx);
 
   tank.barrelAngle = angle - tank.angle + PI/2;
-  if (tank.barrelAngle > 60) {
-    tank.barrelAngle = 60;
-  }
-  else if (tank.angle < -60) {
-    tank.barrelAngle = -60;
-  }
-
-  tank.barrelAngle = radians(angle);  
+  tank.barrelAngle = constrain(tank.barrelAngle, -PI/2, PI/2); 
 }
 
 function turnSelector() {
   if (turn === 'blue') {
-    drawTrajectory(tankBlue);
     moveBarrel(tankBlue);
+    drawTrajectory(tankBlue);
   }
   else if (turn === 'red') {
-    drawTrajectory(tankRed);
     moveBarrel(tankRed);
+    drawTrajectory(tankRed);
   }
 
   if (millis() > turnTime + lastTurnTime) {
@@ -220,11 +213,11 @@ function drawTrajectory(tank) {
   let angle = tank.angle + tank.barrelAngle;
   let barrelLength = tank.barrelH;
 
-  // Start at the tip of the barrel
+  //start at the tip of the barrel
   let startX = tankCenterX + sin(angle) * barrelLength;
   let startY = tankCenterY - cos(angle) * barrelLength;
 
-  // Calculate initial velocity
+  //calvulate starting point
   let velocityX = sin(angle) * shellSpeed;
   let velocityY = -cos(angle) * shellSpeed;
 
