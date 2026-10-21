@@ -6,7 +6,8 @@
 // - describe what you did to take this project "above and beyond"
 
 //comment as you go so you dont lose your mind
-
+let pickedAngle;
+let barSlider;
 
 let turn = 'blue';
 let turnTime = 10000;
@@ -19,7 +20,6 @@ let shells = [];
 
 let shellSpeed = 15;
 let gravity = 0.2;
-let trajectoryDots = 50;
 
 let speed = 1;
 
@@ -29,6 +29,7 @@ async function setup() {
   tankBlue.x = width/6;
   generateTerrain();
   rectMode(CORNER);
+  barSlider = width/4 + 115;
 }
 
 function draw() {
@@ -43,6 +44,7 @@ function draw() {
   tankOnTerrain(tankBlue);
   tankOnTerrain(tankRed);
   moveTanks();
+  anglePicker();
 
   turnSelector();
 
@@ -159,26 +161,19 @@ function moveTanks() {
 }
 
 function moveBarrel(tank) {
-  let tankCenterX = tank.x + tank.w / 2;
-  let tankCenterY = tank.y + tank.h / 2;
+  //let tankCenterX = tank.x + tank.w / 2;
+  //let tankCenterY = tank.y + tank.h / 2;
 
-  //angle from tank to mouse
-  let dx = mouseX - tankCenterX;
-  let dy = mouseY - tankCenterY;
-  let angle = atan2(dy, dx);
-
-  tank.barrelAngle = angle - tank.angle + PI/2;
-  tank.barrelAngle = constrain(tank.barrelAngle, -PI/2, PI/2); 
+  //tank.barrelAngle = anglePicker - tank.angle + PI/2;
+  //tank.barrelAngle = constrain(tank.barrelAngle, -PI/2, PI/2); 
 }
 
 function turnSelector() {
   if (turn === 'blue') {
     moveBarrel(tankBlue);
-    drawTrajectory(tankBlue);
   }
   else if (turn === 'red') {
     moveBarrel(tankRed);
-    drawTrajectory(tankRed);
   }
 
   if (millis() > turnTime + lastTurnTime) {
@@ -203,55 +198,11 @@ function mousePressed() {
     turn = 'blue';
     fireShell(tankRed);
   }
-}
 
-
-function drawTrajectory(tank) {
-  let tankCenterX = tank.x + tank.w / 2;
-  let tankCenterY = tank.y + tank.h / 2;
-
-  let angle = tank.angle + tank.barrelAngle;
-  let barrelLength = tank.barrelH;
-
-  //start at the tip of the barrel
-  let startX = tankCenterX + sin(angle) * barrelLength;
-  let startY = tankCenterY - cos(angle) * barrelLength;
-
-  //calvulate starting point
-  let velocityX = sin(angle) * shellSpeed;
-  let velocityY = -cos(angle) * shellSpeed;
-
-  fill(50);
-  noStroke();
-
-  // Predict where the shell will be at each future frame
-  for (let t = 1; t <= trajectoryDots; t += 2) {
-    let x = startX + velocityX * t;
-    let y = startY + velocityY * t
-      + 0.5 * gravity * t * t;
-
-    circle(x, y, 6);
-  }
 }
 
 function fireShell(tank) {
-  let tankCenterX = tank.x + tank.w / 2;
-  let tankCenterY = tank.y + tank.h / 2;
 
-  let angle = tank.angle + tank.barrelAngle;
-  let barrelLength = tank.barrelH;
-
-  let startX = tankCenterX + sin(angle) * barrelLength;
-  let startY = tankCenterY - cos(angle) * barrelLength;
-
-  let tankShell = {
-    x: startX,
-    y: startY,
-    velocityX: sin(angle) * shellSpeed,
-    velocityY: -cos(angle) * shellSpeed,
-  };
-
-  shells.push(tankShell);
 }
 
 function updateShells() {
@@ -266,5 +217,22 @@ function updateShells() {
     fill('yellow');
     noStroke();
     circle(tankShell.x, tankShell.y, 10);
+  }
+}
+
+function anglePicker() {
+  let barX = width/4;
+  let barY = height/8;
+
+  fill('red');
+  stroke('red');
+  rect(barX, barY, 250, 30);
+
+  fill('black');
+  stroke('black');
+  rect(barSlider, barY, 10, 30);
+
+  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 250) {
+    barSlider = mouseX;
   }
 }
