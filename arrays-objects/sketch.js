@@ -5,9 +5,11 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-//comment as you go so you dont lose your mind
-let pickedAngle;
-let barSlider;
+let angleSlider;
+let barSliderTurn;
+
+let trajectoryPickerTurn;
+let trajectorySlider;
 
 let turn = 'blue';
 let turnTime = 10000;
@@ -29,7 +31,10 @@ async function setup() {
   tankBlue.x = width/6;
   generateTerrain();
   rectMode(CORNER);
-  barSlider = width/4 + 115;
+  angleSlider = width/4 + 180;
+  trajectorySlider = height/8 + 90;
+  barSliderTurn = true;
+  trajectoryPickerTurn = false;
 }
 
 function draw() {
@@ -161,11 +166,9 @@ function moveTanks() {
 }
 
 function moveBarrel(tank) {
-  //let tankCenterX = tank.x + tank.w / 2;
-  //let tankCenterY = tank.y + tank.h / 2;
-
-  //tank.barrelAngle = anglePicker - tank.angle + PI/2;
-  //tank.barrelAngle = constrain(tank.barrelAngle, -PI/2, PI/2); 
+  let angle = map(angleSlider, width/4, width/4 + 360, -90, 90);
+  tank.barrelAngle = radians(angle) - radians(tank.angle);
+  tank.barrelAngle = constrain(tank.barrelAngle, -PI/2, PI/2); 
 }
 
 function turnSelector() {
@@ -191,18 +194,22 @@ function mousePressed() {
   if (turn === 'blue') {
     lastTurnTime = millis(); 
     turn = 'red';
-    fireShell(tankBlue);
   }
   else if (turn === 'red') {
     lastTurnTime = millis();    
     turn = 'blue';
-    fireShell(tankRed);
   }
-
+  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && barSliderTurn === true) {
+    barSliderTurn = false;
+    trajectoryPickerTurn = true;
+  }
 }
 
 function fireShell(tank) {
+  let tankCenterX = tank.width/2;
+  let tankCenterY = tank.width/2;
 
+  
 }
 
 function updateShells() {
@@ -226,13 +233,30 @@ function anglePicker() {
 
   fill('red');
   stroke('red');
-  rect(barX, barY, 250, 30);
+  rect(barX, barY, 360, 30);
 
   fill('black');
   stroke('black');
-  rect(barSlider, barY, 10, 30);
+  rect(angleSlider, barY, 10, 30);
 
-  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 250) {
-    barSlider = mouseX;
+  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && barSliderTurn === true) {
+    angleSlider = mouseX;
+  }
+}
+
+function trajectoryPicker() {
+  let barX = width*3/4;
+  let barY = height/8;
+
+  fill('red');
+  stroke('red');
+  rect(barX, barY, 30, 180);
+
+  fill('black');
+  stroke('black');
+  rect(barX, trajectorySlider, 30, 10);
+
+  if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width/4 && mouseX < width/4 + 30 && trajectoryPickerTurn === true) {
+    trajectorySlider = mouseY;
   }
 }
