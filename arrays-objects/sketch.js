@@ -12,7 +12,7 @@ let trajectorySlider;
 let trajectoryPicked;
 
 let turn = 'blue';
-let turnTime = 10000;
+let turnTime = 15000;
 
 let lastTurnTime = 0;
 let terrain = [];
@@ -52,6 +52,7 @@ function draw() {
   fireButton();
 
   turnSelector();
+  turnTimer();
 
   updateShells();
 }
@@ -271,7 +272,17 @@ function fireButton() {
   else {
     fill('red');
     stroke('black');
-    text('FIRE', width/9, height/8);
     circle(width/9, height/8, 100);
+    fill('black');
+    text('FIRE', width/9 - 35, height/8 + 10);
+    textSize(30);  
   }
+}
+
+function turnTimer() {
+  let timer = (millis() - lastTurnTime)/1000;
+  
+  fill('black');
+  text(`${turn}'s turn 
+Turn time: ${timer.toFixed(2)}`, width/3.35, height/5);
 }
