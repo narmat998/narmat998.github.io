@@ -6,10 +6,10 @@
 // - describe what you did to take this project "above and beyond"
 
 let angleSlider;
-let barSliderTurn;
+let anglePicked;
 
-let trajectoryPickerTurn;
 let trajectorySlider;
+let trajectoryPicked;
 
 let turn = 'blue';
 let turnTime = 10000;
@@ -33,8 +33,6 @@ async function setup() {
   rectMode(CORNER);
   angleSlider = width/4 + 180;
   trajectorySlider = height/8 + 90;
-  barSliderTurn = true;
-  trajectoryPickerTurn = false;
 }
 
 function draw() {
@@ -50,6 +48,8 @@ function draw() {
   tankOnTerrain(tankRed);
   moveTanks();
   anglePicker();
+  trajectoryPicker();
+  fireButton();
 
   turnSelector();
 
@@ -191,17 +191,18 @@ function turnSelector() {
 }
 
 function mousePressed() {
-  if (turn === 'blue') {
-    lastTurnTime = millis(); 
-    turn = 'red';
-  }
-  else if (turn === 'red') {
-    lastTurnTime = millis();    
-    turn = 'blue';
-  }
-  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && barSliderTurn === true) {
-    barSliderTurn = false;
-    trajectoryPickerTurn = true;
+  if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40) {
+    if (turn === 'blue') {
+      lastTurnTime = millis(); 
+      turn = 'red';
+    }
+    else if (turn === 'red') {
+      lastTurnTime = millis();    
+      turn = 'blue';
+    }
+    if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360) {
+
+    }
   }
 }
 
@@ -239,7 +240,7 @@ function anglePicker() {
   stroke('black');
   rect(angleSlider, barY, 10, 30);
 
-  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && barSliderTurn === true) {
+  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && mouseIsPressed) {
     angleSlider = mouseX;
   }
 }
@@ -256,7 +257,21 @@ function trajectoryPicker() {
   stroke('black');
   rect(barX, trajectorySlider, 30, 10);
 
-  if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width/4 && mouseX < width/4 + 30 && trajectoryPickerTurn === true) {
+  if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width*3/4 && mouseX < width*3/4 + 30 && mouseIsPressed) {
     trajectorySlider = mouseY;
+  }
+}
+
+function fireButton() {
+  if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40) {
+    fill('gray');
+    stroke('black');
+    circle(width/9, height/8, 80);
+  }
+  else {
+    fill('red');
+    stroke('black');
+    text('FIRE', width/9, height/8);
+    circle(width/9, height/8, 100);
   }
 }
