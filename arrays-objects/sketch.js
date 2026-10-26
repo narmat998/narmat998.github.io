@@ -20,7 +20,8 @@ const NUMBER_RECTS = 2000;
 
 let shells = [];
 
-let shellSpeed = 15;
+let shellSpeedX = 10;
+let shellSpeedY = 10;
 let gravity = 0.2;
 
 let speed = 1;
@@ -194,23 +195,37 @@ function turnSelector() {
 function mousePressed() {
   if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40) {
     if (turn === 'blue') {
+      fireShell(tankBlue);
       lastTurnTime = millis(); 
       turn = 'red';
     }
     else if (turn === 'red') {
+      fireShell(tankRed);
       lastTurnTime = millis();    
       turn = 'blue';
-    }
-    if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360) {
-
     }
   }
 }
 
 function fireShell(tank) {
-  let tankCenterX = tank.width/2;
-  let tankCenterY = tank.width/2;
+  let angle = tank.angle + tank.barrelAngle;
 
+  let tankCenterX = tank.w/2;
+  let tankCenterY = tank.h/2;
+  
+  //bring shell to end of barrel
+  let startX = tankCenterX + cos(angle - PI/2) * tank.barrelH;
+  let startY = tankCenterY + sin(angle - PI/2) * tank.barrelH;
+
+  let tankShell = {
+    x: startX,
+    y: startY,
+    radius: 5,
+    velocityX: shellSpeedX * cos(angle - PI/2),
+    velocityY: shellSpeedY * sin(angle - PI/2),
+  };
+
+  shells.push(tankShell);
   
 }
 
@@ -225,7 +240,7 @@ function updateShells() {
 
     fill('yellow');
     noStroke();
-    circle(tankShell.x, tankShell.y, 10);
+    circle(tankShell.x, tankShell.y, tankShell.radius*2);
   }
 }
 
@@ -243,6 +258,7 @@ function anglePicker() {
 
   if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && mouseIsPressed) {
     angleSlider = mouseX;
+    shellSpeedX = (mouseX + 360 - width*3/4)/1000;
   }
 }
 
@@ -260,6 +276,7 @@ function trajectoryPicker() {
 
   if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width*3/4 && mouseX < width*3/4 + 30 && mouseIsPressed) {
     trajectorySlider = mouseY;
+    shellSpeedY = (mouseY + 180 - height*7/8)/1000;
   }
 }
 
