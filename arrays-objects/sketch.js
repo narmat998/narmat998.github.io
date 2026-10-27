@@ -38,23 +38,23 @@ async function setup() {
 
 function draw() {
   background(220);
-
+  
   stroke('green');
   fill('green');
   for (let theRect of terrain) {
     rect(theRect.x, theRect.y, theRect.w, theRect.h);
   }
-
+  
   tankOnTerrain(tankBlue);
   tankOnTerrain(tankRed);
   moveTanks();
   anglePicker();
   trajectoryPicker();
   fireButton();
-
+  
   turnSelector();
   turnTimer();
-
+  
   updateShells();
 }
 
@@ -77,7 +77,7 @@ function spawnRectangle(leftSide, rectWidth, rectHeight) {
     w: rectWidth,
     h: rectHeight,
   };
-
+  
   return theRect;
 }
 
@@ -102,7 +102,7 @@ let tankRed = {
 function getTerrainY(x) {
   let i = Math.floor(x/(width/NUMBER_RECTS));
   i = constrain(i, 0, terrain.length - 1);
-
+  
   return terrain[i].y;
 }
 
@@ -110,22 +110,22 @@ function tankOnTerrain(tank) {
   //use left corner as left x and right corner as right x
   let leftX = tank.x;
   let rightX = tank.x + tank.w;
-
+  
   //get y value at x positions
   let leftY = getTerrainY(leftX);
   let rightY = getTerrainY(rightX);
-
+  
   //find tank angle with the two y values
   tank.angle = Math.atan2(rightY - leftY, rightX - leftX);
   tank.y = (leftY + rightY) / 2 - tank.h;
-
+  
   //make just the tank rotate
   push();
-
+  
   // move to centre of tank
   translate(tank.x + tank.w / 2, tank.y + tank.h / 2);
   rotate(tank.angle);
-
+  
   //draw tank
   if (tank === tankBlue) {
     fill('blue');
@@ -138,7 +138,7 @@ function tankOnTerrain(tank) {
   rotate(tank.barrelAngle);
   rect(0 - tank.w/6, 0 - tank.barrelH, tank.barrelW, tank.barrelH);
   pop();
-
+  
   //make the tank 
   rect(-tank.w/2, -tank.h / 2, tank.w, tank.h);
   pop();
@@ -180,7 +180,7 @@ function turnSelector() {
   else if (turn === 'red') {
     moveBarrel(tankRed);
   }
-
+  
   if (millis() > turnTime + lastTurnTime) {
     lastTurnTime = millis();
     if (turn === 'blue') {
@@ -209,35 +209,46 @@ function mousePressed() {
 
 function fireShell(tank) {
   let angle = tank.angle + tank.barrelAngle;
-
+  let launchStrength = map(trajectorySlider, height / 8, height / 8 + 180, 30, 0);
+  
   let tankCenterX = tank.w/2;
   let tankCenterY = tank.h/2;
   
-  //bring shell to end of barrel
+  //bring shell to end of barrel  
   let startX = tankCenterX + cos(angle - PI/2) * tank.barrelH;
   let startY = tankCenterY + sin(angle - PI/2) * tank.barrelH;
-
-  let tankShell = {
-    x: startX,
-    y: startY,
-    radius: 5,
-    velocityX: shellSpeedX * cos(angle - PI/2),
-    velocityY: shellSpeedY * sin(angle - PI/2),
-  };
-
-  shells.push(tankShell);
   
+  let tankShell = {
+    x: tank.x + startX,
+    y: tank.y + startY,
+    radius: 5,
+    velocityX: launchStrength * cos(angle - PI/2),
+    velocityY: launchStrength * sin(angle - PI/2),
+  };
+  
+  shells.push(tankShell);
 }
 
 function updateShells() {
-  for (let i = 0; i < shells.length; i++) {
-
+  for (let i = shells.length-1; i > 0; i--) {
+    
     let tankShell = shells[i];
+    tankShell.velocityY += gravity;
+
     tankShell.x += tankShell.velocityX;
     tankShell.y += tankShell.velocityY;
 
-    tankShell.velocityY += gravity;
+    let hitTank = hitDetector(tankShell);
+    
+    let groundY = getTerrainY(tankShell.x);
 
+    //remove shell if it hits the ground
+    if (tankShell.y + tankShell.radius >= groundY) {
+      shells.splice(i, 1);
+      continue;
+    }
+    
+    //make the shell
     fill('yellow');
     noStroke();
     circle(tankShell.x, tankShell.y, tankShell.radius*2);
@@ -255,10 +266,10 @@ function anglePicker() {
   fill('black');
   stroke('black');
   rect(angleSlider, barY, 10, 30);
+  text('Angle', width/4 + 145, height/8 - 20);
 
   if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && mouseIsPressed) {
     angleSlider = mouseX;
-    shellSpeedX = (mouseX + 360 - width*3/4)/1000;
   }
 }
 
@@ -273,10 +284,10 @@ function trajectoryPicker() {
   fill('black');
   stroke('black');
   rect(barX, trajectorySlider, 30, 10);
+  text('Power', width*3/4 - 30, height/8 + 220)
 
   if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width*3/4 && mouseX < width*3/4 + 30 && mouseIsPressed) {
     trajectorySlider = mouseY;
-    shellSpeedY = (mouseY + 180 - height*7/8)/1000;
   }
 }
 
@@ -302,4 +313,17 @@ function turnTimer() {
   fill('black');
   text(`${turn}'s turn 
 Turn time: ${timer.toFixed(2)}`, width/3.35, height/5);
+}
+
+function hitDetector(shell) {
+  //check blue tank
+    if (collideCircleRect(shell.x, shell.y, shell.radius * 2, tankBlue.x, tankBlue.y, tankBlue.w, tankBlue.h) === true) {
+    return tankBlue;
+  }
+  //check red tank
+  if (collideCircleRect(shell.x, shell.y, shell.radius * 2, tankRed.x, tankRed.y, tankRed.w, tankRed.h) === true) {
+    return tankRed;
+  }
+
+  return null;
 }
