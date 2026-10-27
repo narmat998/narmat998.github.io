@@ -3,13 +3,21 @@
 // October 7th, 2026
 //
 // Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+// I learned about the ternary operator (?) to condense if statements (I didn't end up using it as much as I thought in the end,)
+// as well as learning about the trigonometry functions inside javascript. I also learned about constrain as an easier way to confine values rather than lengthy if statements. 
+// I also learned about map and how to use it to take a range of values and map it to another range of values. 
+// Getting parabolic motion to track to adjustable varaibles was really complicated at first because i was originally just using the entire width of the screen and mouseX, and displaying a live trajectory parabola, but eventually pivoted to using sliders.
+//I was inspired by this game and it's use of sliders: https://www.mathsisfun.com/games/tanks.html.
 
+//To play the game, the blue tank uses A and D, and the red tank uses J and L. 
+// The one slider dictates the angle of the barrel, and the other slider maps the amounts of power in firing a shell from your tank. when you get hit, you blow up.
+//For some strange reason I cannot find, the instructions bolds itself when you fire if you dont just toggle it off.
+
+//global variables
+let game = 'yes';
 let angleSlider;
-let anglePicked;
 
 let trajectorySlider;
-let trajectoryPicked;
 
 let turn = 'blue';
 let turnTime = 15000;
@@ -19,12 +27,18 @@ let terrain = [];
 const NUMBER_RECTS = 2000;
 
 let shells = [];
+let explosions = [];
 
 let shellSpeedX = 10;
 let shellSpeedY = 10;
 let gravity = 0.2;
 
+let hitTank;
 let speed = 1;
+
+let instructions = 'show';
+
+let winner = null;
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -56,9 +70,20 @@ function draw() {
   turnTimer();
   
   updateShells();
+  updateExplosions();
+
+  makeInstructions();
+
+  if (game === 'no') {
+    showWinner();
+    return; 
+  }
+
 }
 
+
 function generateTerrain() {
+  //use perlin noise to make the terrain randomly generated
   let theWidth = width/NUMBER_RECTS;
   let time = 0;
   let changeTime = 0.001;
@@ -70,6 +95,7 @@ function generateTerrain() {
   }
 }
 
+//make the rectangles to fill the terrain
 function spawnRectangle(leftSide, rectWidth, rectHeight) {
   let theRect = {
     x: leftSide,
@@ -81,6 +107,7 @@ function spawnRectangle(leftSide, rectWidth, rectHeight) {
   return theRect;
 }
 
+//blue tank
 let tankBlue = {
   w: 50,
   h: 25,
@@ -90,6 +117,7 @@ let tankBlue = {
   barrelAngle: 0,
 };
 
+//red tank
 let tankRed = {
   w: 50,
   h: 25,
@@ -100,6 +128,7 @@ let tankRed = {
 };
 
 function getTerrainY(x) {
+  //find the y value for an x value
   let i = Math.floor(x/(width/NUMBER_RECTS));
   i = constrain(i, 0, terrain.length - 1);
   
@@ -123,7 +152,7 @@ function tankOnTerrain(tank) {
   push();
   
   // move to centre of tank
-  translate(tank.x + tank.w / 2, tank.y + tank.h / 2);
+  translate(tank.x + tank.w/2, tank.y + tank.h/2);
   rotate(tank.angle);
   
   //draw tank
@@ -145,6 +174,7 @@ function tankOnTerrain(tank) {
 }
 
 function moveTanks() {
+  //use a and d to move the blue tank, and j and l to move the red tank
   if (keyIsDown('d') && turn === 'blue') {
     if (tankBlue.x < window.width - tankBlue.w) {
       tankBlue.x += speed;
@@ -167,6 +197,7 @@ function moveTanks() {
   }
 }
 
+//move the tank barrel to the anglesliders position
 function moveBarrel(tank) {
   let angle = map(angleSlider, width/4, width/4 + 360, -90, 90);
   tank.barrelAngle = radians(angle) - radians(tank.angle);
@@ -174,6 +205,7 @@ function moveBarrel(tank) {
 }
 
 function turnSelector() {
+//if its that tanks turn allow its barrel to move, if the turn timer is esxceeded, switch turns
   if (turn === 'blue') {
     moveBarrel(tankBlue);
   }
@@ -193,7 +225,8 @@ function turnSelector() {
 }
 
 function mousePressed() {
-  if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40) {
+  //if the game is still going and you click on the fire button check whoes turn it is and fire a shell from their tank
+  if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40 && game === 'yes') {
     if (turn === 'blue') {
       fireShell(tankBlue);
       lastTurnTime = millis(); 
@@ -209,12 +242,13 @@ function mousePressed() {
 
 function fireShell(tank) {
   let angle = tank.angle + tank.barrelAngle;
-  let launchStrength = map(trajectorySlider, height / 8, height / 8 + 180, 30, 0);
+  //track the strength to the trajectory slider 
+  let launchStrength = map(trajectorySlider, height / 8, height / 8 + 180, 20, 5);
   
   let tankCenterX = tank.w/2;
   let tankCenterY = tank.h/2;
   
-  //bring shell to end of barrel  
+  //shell starting point to end of barrel  
   let startX = tankCenterX + cos(angle - PI/2) * tank.barrelH;
   let startY = tankCenterY + sin(angle - PI/2) * tank.barrelH;
   
@@ -230,7 +264,7 @@ function fireShell(tank) {
 }
 
 function updateShells() {
-  for (let i = shells.length-1; i > 0; i--) {
+  for (let i = shells.length-1; i >= 0; i--) {
     
     let tankShell = shells[i];
     tankShell.velocityY += gravity;
@@ -238,8 +272,16 @@ function updateShells() {
     tankShell.x += tankShell.velocityX;
     tankShell.y += tankShell.velocityY;
 
-    let hitTank = hitDetector(tankShell);
-    
+    hitTank = hitDetector(tankShell);
+    if (hitTank !== null) {
+      winner = hitTank === tankBlue ? 'Red' : 'Blue';
+
+      explode(hitTank);
+      shells.splice(i, 1);
+      game = 'no'
+      return;
+    }
+
     let groundY = getTerrainY(tankShell.x);
 
     //remove shell if it hits the ground
@@ -263,12 +305,14 @@ function anglePicker() {
   stroke('red');
   rect(barX, barY, 360, 30);
 
+  textSize(30);
   fill('black');
   stroke('black');
   rect(angleSlider, barY, 10, 30);
   text('Angle', width/4 + 145, height/8 - 20);
 
-  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && mouseIsPressed) {
+  //the slider tracks to the mouse when its clicked and in the area
+  if (mouseY > height/8 && mouseY < height/8 + 30 && mouseX > width/4 && mouseX < width/4 + 360 && mouseIsPressed && game === 'yes') {
     angleSlider = mouseX;
   }
 }
@@ -281,18 +325,21 @@ function trajectoryPicker() {
   stroke('red');
   rect(barX, barY, 30, 180);
 
+  textSize(30);
   fill('black');
   stroke('black');
   rect(barX, trajectorySlider, 30, 10);
   text('Power', width*3/4 - 30, height/8 + 220)
 
-  if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width*3/4 && mouseX < width*3/4 + 30 && mouseIsPressed) {
+  //the slider tracks to the mouse when its clicked and in the area
+  if (mouseY > height/8 && mouseY < height/8 + 180 && mouseX > width*3/4 && mouseX < width*3/4 + 30 && mouseIsPressed && game === 'yes') {
     trajectorySlider = mouseY;
   }
 }
 
 function fireButton() {
-  if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40) {
+  //if you hover over the fire button make it grey
+  if (mouseX > width/9 -40 && mouseX < width/9 + 40 && mouseY > height/8 - 40 && mouseY < height/8 + 40 && game === 'yes') {
     fill('gray');
     stroke('black');
     circle(width/9, height/8, 80);
@@ -302,28 +349,108 @@ function fireButton() {
     stroke('black');
     circle(width/9, height/8, 100);
     fill('black');
-    text('FIRE', width/9 - 35, height/8 + 10);
-    textSize(30);  
+    text('FIRE', width/9 - 35, height/8 + 10);  
   }
 }
 
 function turnTimer() {
   let timer = (millis() - lastTurnTime)/1000;
   
-  fill('black');
-  text(`${turn}'s turn 
-Turn time: ${timer.toFixed(2)}`, width/3.35, height/5);
+  //if no winner show the turn and the time
+  if (hitTank === null && game === 'yes') {
+    textSize(30);
+    fill('black');
+    text(`${turn}'s turn`, width/3.35, height/5);
+    text(`Turn time: ${timer.toFixed(2)}`, width/3.35, height/5 + 30);
+  }
+
+
 }
 
 function hitDetector(shell) {
   //check blue tank
-    if (collideCircleRect(shell.x, shell.y, shell.radius * 2, tankBlue.x, tankBlue.y, tankBlue.w, tankBlue.h) === true) {
+  if (collideRectCircle(tankBlue.x, tankBlue.y, tankBlue.w, tankBlue.h, shell.x, shell.y, shell.radius * 2) === true) {
     return tankBlue;
   }
   //check red tank
-  if (collideCircleRect(shell.x, shell.y, shell.radius * 2, tankRed.x, tankRed.y, tankRed.w, tankRed.h) === true) {
+  if (collideRectCircle(tankRed.x, tankRed.y, tankRed.w, tankRed.h, shell.x, shell.y, shell.radius * 2) === true) {
     return tankRed;
   }
 
   return null;
+}
+
+function explode(tank) {
+  //make 50 circles
+  for (let i = 0; i < 50; i++) {
+    explosions.push({
+      x: tank.x + tank.w/2,
+      y: tank.y + tank.h/2,
+      velocityX: random(-5, 5),
+      velocityY: random(-5, 5),
+      radius: random(3, 20),
+      life: 60,
+    });
+  }
+
+  //make the tank go off screen 
+  tank.x = 4000;
+}
+
+function updateExplosions() {
+  for (let i = explosions.length - 1; i >= 0; i--) {
+    let debris = explosions[i];
+
+    //move debris
+    debris.x += debris.velocityX;
+    debris.y += debris.velocityY;
+    debris.life-- ;
+
+    //randomly colour the circles
+    fill(random(0, 255), random(0, 255), random(0, 255));
+    noStroke();
+    circle(debris.x, debris.y, debris.radius * debris.life / 60);
+
+    //if the debris has existed for its lifespan get rid of it
+    if (debris.life <= 0) {
+      explosions.splice(i, 1);
+    }
+  }
+}
+
+function makeInstructions() {
+  if (instructions === 'show') {
+    fill('black');
+    textFont('Arial');
+    textStyle(NORMAL);
+    textSize(30);
+    text('Blue tank uses A and D to move, Red tank uses J and L to move. Use the angle and trajectory sliders to pick your trajectory. Use Ctrl + R to play again.', width/10, height*7/8);
+  }
+}
+
+
+function keyPressed() {
+  //toggle instructions
+  if (key === 'i') {
+    if (instructions === 'show') {
+      instructions = 'hide';
+    }
+    else if (instructions === 'hide') {
+      instructions = 'show';
+    }
+  }  
+}
+
+function showWinner() {
+  //show the winner
+
+  fill('black');
+  textSize(50);
+
+  text(`${winner} Tank Won!`, width/2 - 25, height/2);
+  turnTime = '';
+  turn = '';
+
+  textSize(20);
+  text('Press Ctrl + R to play again', width/2, height/2 + 60);
 }
