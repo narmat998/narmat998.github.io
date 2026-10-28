@@ -9,7 +9,7 @@
 // const SQUARE_DIMENSIONS = grid.length;
 
 //if randomizing the grid
-const SQUARE_DIMENSIONS = 10;
+const SQUARE_DIMENSIONS = 20;
 let grid;
 let cellSize;
 
@@ -57,4 +57,21 @@ function randomizeGrid(cols, rows) {
     }
   }
   return newGrid;
+}
+
+function mousePressed() {
+  let x = Math.floor(mouseX/cellSize);
+  let y = Math.floor(mouseY/cellSize);
+
+  console.log(x, y);
+  toggleCell(x, y);
+}
+
+function toggleCell(x, y) {
+  if (grid[y][x] === 1) {
+    grid[y][x] = 0;
+  }
+  else if (grid[y][x] === 0) {
+    grid[y][x] = 1;
+  }
 }
