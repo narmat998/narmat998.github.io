@@ -17,3 +17,4 @@
 ## Projects
 - [Interactive Scene](scene)
 - [Arrays and Object Notation](arrays-objects)
+- [2D Array Project](2darray-minesweeper)

@@ -12,7 +12,7 @@ let grid;
 async function setup() {
   createCanvas(windowWidth, windowHeight);
   rows = Math.floor(height/CELL_SIZE);
-  cols = Math.floor(width/CELL_SIZE);
+  cols = Math.floor(height/CELL_SIZE);
   grid = generateRandomGrid(cols, rows);
 }
 
