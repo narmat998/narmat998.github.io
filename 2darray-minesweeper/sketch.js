@@ -20,21 +20,23 @@ let bombsPlaced = 0;
 let offsetX;
 let offsetY;
 
-function preload() {
-  // connect to a p5party server
-  partyConnect(
-    "wss://demoserver.p5party.org", 
+
+async function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  await partyConnect(
+    "wss://demoserver.p5party.org",
     "minesweeper_vs"
   );
-  game = partyLoadShared("game", {
+
+  console.log('connected');
+
+  game = await partyLoadShared("game", {
     grid: generateRandomGrid(cols, rows),
     bombsPlaced: 0,
   });
 
-}
-
-async function setup() {
-  createCanvas(windowWidth, windowHeight);
+  console.log("game:", game);
  
   
   bombCount = 10;
@@ -46,6 +48,7 @@ async function setup() {
 function draw() {
   background(255);
   displayGrid();
+  changeCell();
 }
 
 function generateRandomGrid(cols, rows) {
@@ -61,6 +64,7 @@ function generateRandomGrid(cols, rows) {
 
 function displayGrid() {
   if (!game || !game.grid) {
+    console.log('game or grid is undefined');
     fill(0);
     textSize(24);
     textAlign(CENTER, CENTER);
@@ -83,21 +87,35 @@ function displayGrid() {
   }
 }
 
-function mousePressed() {
-  let x = Math.floor((mouseX - offsetX)/CELL_SIZE);
-  let y = Math.floor((mouseY - offsetY)/CELL_SIZE);
+function changeCell() {
+  if (mouseIsPressed === true) {
+    let x = Math.floor((mouseX - offsetX)/CELL_SIZE);
+    let y = Math.floor((mouseY - offsetY)/CELL_SIZE);
   
-  if (mouseButton === LEFT) {
-    if (game.grid[y][x] === 0 && game.bombsPlaced < bombCount) {
-      game.grid[y][x] = 1;
-      game.bombsPlaced++
+    if (x < 0 || x >= cols || y < 0 || y >= rows) {
+      return;
     }
-  }
   
-  else if (mouseButton === RIGHT) {
-    if (game.grid[y][x] === 1) {
-      game.grid[y][x] = 0;
-      game.bombsPlaced--
+    if (mouseButton.left) {
+      if (game.grid[y][x] === 0 && game.bombsPlaced < bombCount) {
+        game.grid[y][x] = 1;
+        game.bombsPlaced++;
+  
+        console.log('bomb placed at: ', x, y)
+        console.log('updated value: ', game.grid[y][x]);
+        console.log('bombs placed: ', game.bombsPlaced);
+      }
+    }
+    
+    else if (mouseButton.right) {
+      if (game.grid[y][x] === 1) {
+        game.grid[y][x] = 0;
+        game.bombsPlaced--
+        
+        console.log('bomb removed at: ', x, y);
+        console.log('updated value: ', game.grid[y][x]);
+        console.log('bombs placed: ', game.bombsPlaced);
+      }
     }
   }
 }
