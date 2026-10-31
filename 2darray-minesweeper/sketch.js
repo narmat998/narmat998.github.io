@@ -92,7 +92,7 @@ function changeCell() {
     let x = Math.floor((mouseX - offsetX)/CELL_SIZE);
     let y = Math.floor((mouseY - offsetY)/CELL_SIZE);
   
-    if (x < 0 || x >= cols || y < 0 || y >= rows) {
+    if (x<0 || x>=cols || y<0 || y>=rows) {
       return;
     }
   
