@@ -13,6 +13,7 @@
 - [Randomized Art](10-art)
 - [Grid Demo](11-grid)
 - [2d Grid](12-grid)
+- [Life-Game](13-life)
 
 ## Projects
 - [Interactive Scene](scene)

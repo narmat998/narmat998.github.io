@@ -24,7 +24,6 @@ let currentPhase = 'placing';
 let offsetX;
 let offsetY;
 
-
 async function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -47,8 +46,7 @@ async function setup() {
 
     gameStarted: false,
 
-    startTime: 0,
-    gameStarted: false,
+    stopwatchStart: 0,
   });
 
   me = await partyLoadMyShared({
@@ -77,7 +75,7 @@ function draw() {
   
   if (partyIsHost() && game.player1Submitted && game.player2Submitted && !game.gameStarted) {
     game.gameStarted = true;
-    game.startTime = Date.now();
+    game.stopwatchStart = Date.now();
   }
 
   if (playerNumber === -1) {
@@ -156,11 +154,11 @@ function mousePressed() {
   console.log("Mouse Y:", mouseY);
 
   if (currentPhase !== "placing" || submitted) {
-  return;
+    return;
   }
   if (mouseX > width/4 && mouseX < width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45) {
-  submitBoard();
-  return;
+    submitBoard();
+    return;
   }
 
   if (mouseX > width - width/4 && mouseX < width - width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45) {
@@ -182,6 +180,9 @@ function changeCell(bombMode) {
   let bombsPlaced;
 
   if (x<0 || x>=cols || y<0 || y>=rows) {
+    return;
+  }
+  if (mouseX > width - width/4 && mouseX < width - width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45) {
     return;
   }
   
@@ -241,8 +242,9 @@ function displayOwnGrid() {
   }
 
   for (let y = 0; y < rows; y++) {
-    if (!currentBoard[y]) continue;
-
+    if (!currentBoard[y]) {
+      continue;
+    }
     for (let x = 0; x < cols; x++) {
       if (currentBoard[y][x] === 0) {
         fill('white');
@@ -311,7 +313,7 @@ function bombModeChecker() {
       bombText = 'Place bombs';
     }
     else if (bombMode === 'removing') {
-      fill('red')
+      fill('red');
       bombText = 'Remove bombs';
     }  
     rect(width - width/4, height/10, 150, 45);
@@ -324,12 +326,12 @@ function bombModeChecker() {
 }
 
 function startGameTimer() {
-    if (game.gameStarted) {
-      game.startTime = millis();
-
-      fill('black');
-      textSize(24);
-      textAlign(CENTER, CENTER);
-      text(round((Date.now() - game.startTime)/1000, 1), width/2, height/8);
+  if (game.gameStarted || !game.stopwatchStart) {
+    return;
   }
+    
+  fill('black');
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text(round((Date.now() - game.stopwatchStart)/1000, 1), width/2, height/8);
 }
