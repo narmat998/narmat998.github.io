@@ -23,6 +23,7 @@ let currentPhase = 'placing';
 
 let offsetX;
 let offsetY;
+let bombsPlaced;
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -156,7 +157,7 @@ function mousePressed() {
   if (currentPhase !== "placing" || submitted) {
     return;
   }
-  if (mouseX > width/4 && mouseX < width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45) {
+  if (mouseX > width/4 && mouseX < width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45 && bombsPlaced === bombCount) {
     submitBoard();
     return;
   }
@@ -177,7 +178,6 @@ function changeCell(bombMode) {
   let x = Math.floor((mouseX - offsetX)/CELL_SIZE);
   let y = Math.floor((mouseY - offsetY)/CELL_SIZE);
   let currentBoard;
-  let bombsPlaced;
 
   if (x<0 || x>=cols || y<0 || y>=rows) {
     return;
