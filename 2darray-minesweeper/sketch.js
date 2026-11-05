@@ -47,7 +47,9 @@ async function setup() {
 
     gameStarted: false,
 
-    stopwatchStart: 0,
+    stopwatchStartTime: 0,
+    elapsedTime: 0,
+    isRunning: false,
   });
 
   me = await partyLoadMyShared({
@@ -74,10 +76,7 @@ function draw() {
 
   managePlayers();
   
-  if (partyIsHost() && game.player1Submitted && game.player2Submitted && !game.gameStarted) {
-    game.gameStarted = true;
-    game.stopwatchStart = Date.now();
-  }
+  stopWatchManager();
 
   if (playerNumber === -1) {
     textSize(18);
@@ -111,7 +110,6 @@ function draw() {
 function managePlayers() {
 
   if (partyIsHost()) {
-    //host is player 1
     me.playerNumber = 1;
 
     //find the first guest
@@ -159,6 +157,7 @@ function mousePressed() {
   }
   if (mouseX > width/4 && mouseX < width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45 && bombsPlaced === bombCount) {
     submitBoard();
+    
     return;
   }
 
@@ -273,13 +272,18 @@ function submitBoard() {
   if (playerNumber === 1) {
     game.player1Submitted = true;
   }
-  else {
+  else if (playerNumber === 2) {
     game.player2Submitted = true;
   }
 
   submitted = true;
 
   console.log('Player', playerNumber, 'submitted');
+
+  if (game.player1Submitted === true && game.player2Submitted === true) {
+    currentPhase = solving;
+    game.gameStarted = true;
+  }
 }
 
 function displayOpponentGrid() {
@@ -307,7 +311,7 @@ function displayOpponentGrid() {
 
 function bombModeChecker() {
   let bombText;
-  if (game) {
+  if (game && !game.gameStarted) {
     if (bombMode === 'placing') {
       fill('green');
       bombText = 'Place bombs';
@@ -333,5 +337,18 @@ function startGameTimer() {
   fill('black');
   textSize(24);
   textAlign(CENTER, CENTER);
-  text(round((Date.now() - game.stopwatchStart)/1000, 1), width/2, height/8);
+  text(round(game.elapsedTime/1000, 1), width/2, height/8);
+}
+
+
+function stopWatchManager() {
+  if (game.gameStarted && !game.isRunning && partyIsHost()) {
+    game.stopwatchStartTime = Date.now();
+    game.isRunning = true;  
+    game.gameStarted = true;
+  }
+  
+  if (game.isRunning) {
+    game.elapsedTime = game.stopwatchStartTime - Date.now();
+  }
 }
