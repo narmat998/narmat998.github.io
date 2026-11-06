@@ -281,7 +281,7 @@ function submitBoard() {
   console.log('Player', playerNumber, 'submitted');
 
   if (game.player1Submitted === true && game.player2Submitted === true) {
-    currentPhase = solving;
+    currentPhase = 'solving';
     game.gameStarted = true;
   }
 }
