@@ -50,6 +50,9 @@ async function setup() {
     stopwatchStartTime: 0,
     elapsedTime: 0,
     isRunning: false,
+
+    player1Revealed: generateRandomGrid(cols, rows),
+    player2Revealed: generateRandomGrid(cols, rows),
   });
 
   me = await partyLoadMyShared({
@@ -148,6 +151,11 @@ function generateRandomGrid(cols, rows) {
 
 
 function mousePressed() {
+  if (currentPhase === "solving") {
+    mineSweep();
+    return;
+  }
+
   console.log("Player number:", playerNumber);
   console.log("Mouse X:", mouseX);
   console.log("Mouse Y:", mouseY);
@@ -155,6 +163,7 @@ function mousePressed() {
   if (currentPhase !== "placing" || submitted) {
     return;
   }
+
   if (mouseX > width/4 && mouseX < width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45 && bombsPlaced === bombCount) {
     submitBoard();
     
@@ -171,6 +180,8 @@ function mousePressed() {
   }
 
   changeCell(bombMode);
+
+
 }
 
 function changeCell(bombMode) {
@@ -268,6 +279,37 @@ function displaySubmitButton() {
   }
 }
 
+function displayOpponentGrid() {
+  let opponentBoard;
+  let revealedBoard;
+
+  if (playerNumber === 1) {
+    opponentBoard = game.player2Grid;
+    revealedBoard = game.player1Revealed;
+  }
+
+  else if (playerNumber === 2) {
+    opponentBoard = game.player1Grid;
+    revealedBoard = game.player2Revealed;
+  }
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      fill("white");
+      square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
+
+      if (revealedBoard[y][x] === 1) {
+        let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
+
+        if (nearbyBombs > 0) {
+          fill("blue");
+          text(nearbyBombs, offsetX + x * CELL_SIZE + CELL_SIZE / 2, offsetY + y * CELL_SIZE + CELL_SIZE / 2);
+        }
+      }
+    }
+  }
+}
+
 function submitBoard() {
   if (playerNumber === 1) {
     game.player1Submitted = true;
@@ -283,29 +325,6 @@ function submitBoard() {
   if (game.player1Submitted === true && game.player2Submitted === true) {
     currentPhase = 'solving';
     game.gameStarted = true;
-  }
-}
-
-function displayOpponentGrid() {
-  let opponentBoard;
-
-  if (playerNumber === 1) {
-    opponentBoard = game.player2Grid;
-  }
-  else {
-    opponentBoard = game.player1Grid;
-  }
-
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (opponentBoard[y][x] === 0) {
-        fill("white");
-      }
-      else {
-        fill("red");
-      }
-      square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
-    }
   }
 }
 
@@ -330,25 +349,96 @@ function bombModeChecker() {
 }
 
 function startGameTimer() {
-  if (game.gameStarted || !game.stopwatchStart) {
+  if (!game.isRunning) {
     return;
   }
-    
+
   fill('black');
   textSize(24);
   textAlign(CENTER, CENTER);
-  text(round(game.elapsedTime/1000, 1), width/2, height/8);
+
+  let seconds = (game.elapsedTime / 1000).toFixed(1);
+  text(seconds, width/2, height/8);
 }
 
-
 function stopWatchManager() {
-  if (game.gameStarted && !game.isRunning && partyIsHost()) {
-    game.stopwatchStartTime = Date.now();
-    game.isRunning = true;  
-    game.gameStarted = true;
+  //host starts the stopwatch
+  if (partyIsHost()) {
+
+    if (game.gameStarted && !game.isRunning) {
+      game.stopwatchStartTime = Date.now();
+      game.elapsedTime = 0;
+      game.isRunning = true;
+    }
+
+    //the host updates elapsed time
+    if (game.isRunning) {
+      game.elapsedTime = Date.now() - game.stopwatchStartTime;
+    }
   }
-  
-  if (game.isRunning) {
-    game.elapsedTime = game.stopwatchStartTime - Date.now();
+}
+
+function mineSweep() {
+  let x = Math.floor((mouseX - offsetX) / CELL_SIZE);
+  let y = Math.floor((mouseY - offsetY) / CELL_SIZE);
+
+  let opponentBoard;
+  let revealedBoard;
+
+  //find the board thst belongs to the opponent
+  if (playerNumber === 1) {
+    opponentBoard = game.player2Grid;
+    revealedBoard = game.player1Revealed;
+  } 
+  else if (playerNumber === 2) {
+    opponentBoard = game.player1Grid;
+    revealedBoard = game.player2Revealed;
   }
+  else {
+    return;
+  }
+
+  //check if click is inside the grid
+  if (x < 0 || x >= cols || y < 0 || y >= rows) {
+    return;
+  }
+
+  if (opponentBoard[y][x] === 1) {
+    console.log("bomb");
+  }
+
+  else {
+    revealedBoard[y][x] = 1
+    let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
+    console.log('cell is touching', nearbyBombs, 'bombs');
+  }
+}
+
+function checkNearbyBombs(board, x, y) {
+  let bombTotal = 0;
+
+  //check the 8 cells
+  for (let yOffset = -1; yOffset <= 1; yOffset++) {
+    for (let xOffset = -1; xOffset <= 1; xOffset++) {
+
+      //ignore its own cell
+      if (xOffset === 0 && yOffset === 0) {
+        continue;
+      }
+
+      let checkX = x + xOffset;
+      let checkY = y + yOffset;
+
+      //if cell on edge
+      if (checkX >= 0 && checkX < cols &&
+          checkY >= 0 && checkY < rows) {
+
+        if (board[checkY][checkX] === 1) {
+          bombTotal++;
+        }
+      }
+    }
+  }
+
+  return bombTotal;
 }
