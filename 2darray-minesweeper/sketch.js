@@ -6,7 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 let game = {};
 
-const CELL_SIZE = 100;
+let cellSize;
 let rows = 9;
 let cols = 9;
 let grid;
@@ -69,8 +69,8 @@ async function setup() {
  
   
   bombCount = 10;
-  offsetX = (width - cols*CELL_SIZE)/2;
-  offsetY = (height - rows*CELL_SIZE)/2;
+  
+  resizeGrid();
   
 }
 
@@ -108,6 +108,12 @@ function draw() {
   }
 
   bombModeChecker();
+}
+
+function resizeGrid() {
+  cellSize = width / cols;
+  offsetX = (width - cols * cellSize) / 2;
+  offsetY = (height - rows * cellSize) / 2;
 }
 
 function managePlayers() {
@@ -185,8 +191,8 @@ function mousePressed() {
 }
 
 function changeCell(bombMode) {
-  let x = Math.floor((mouseX - offsetX)/CELL_SIZE);
-  let y = Math.floor((mouseY - offsetY)/CELL_SIZE);
+  let x = Math.floor((mouseX - offsetX)/cellSize);
+  let y = Math.floor((mouseY - offsetY)/cellSize);
   let currentBoard;
 
   if (x<0 || x>=cols || y<0 || y>=rows) {
@@ -262,7 +268,7 @@ function displayOwnGrid() {
       else if (currentBoard[y][x] === 1) {
         fill('red');
       }
-      square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
+      square(offsetX + x * cellSize, offsetY + y * cellSize, cellSize);
     }
   }
 }
@@ -296,14 +302,14 @@ function displayOpponentGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       fill("white");
-      square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
+      square(offsetX + x * cellSize, offsetY + y * cellSize, cellSize);
 
       if (revealedBoard[y][x] === 1) {
         let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
 
         if (nearbyBombs > 0) {
           fill("blue");
-          text(nearbyBombs, offsetX + x * CELL_SIZE + CELL_SIZE / 2, offsetY + y * CELL_SIZE + CELL_SIZE / 2);
+          text(nearbyBombs, offsetX + x * cellSize + cellSize / 2, offsetY + y * cellSize + cellSize / 2);
         }
       }
     }
@@ -379,8 +385,8 @@ function stopWatchManager() {
 }
 
 function mineSweep() {
-  let x = Math.floor((mouseX - offsetX) / CELL_SIZE);
-  let y = Math.floor((mouseY - offsetY) / CELL_SIZE);
+  let x = Math.floor((mouseX - offsetX) / cellSize);
+  let y = Math.floor((mouseY - offsetY) / cellSize);
 
   let opponentBoard;
   let revealedBoard;
