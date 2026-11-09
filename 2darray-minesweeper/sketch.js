@@ -408,7 +408,7 @@ function mineSweep() {
   }
 
   else {
-    revealedBoard[y][x] = 1
+    revealedBoard[y][x] = 1;
     let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
     console.log('cell is touching', nearbyBombs, 'bombs');
   }
