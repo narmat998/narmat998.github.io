@@ -51,8 +51,8 @@ async function setup() {
     elapsedTime: 0,
     isRunning: false,
 
-    player1ClickedBox: generateRandomGrid(cols, rows),
-    player2ClickedBox: generateRandomGrid(cols, rows),
+    player1SolvedBoard: generateRandomGrid(cols, rows),
+    player2SolvedBoard: generateRandomGrid(cols, rows),
   });
 
   me = await partyLoadMyShared({
@@ -281,16 +281,16 @@ function displaySubmitButton() {
 
 function displayOpponentGrid() {
   let opponentBoard;
-  let clickedBoxBoard;
+  let solvedBoard;
 
   if (playerNumber === 1) {
     opponentBoard = game.player2Grid;
-    clickedBoxBoard = game.player1ClickedBox;
+    solvedBoard = game.player1SolvedBoard;
   }
 
   else if (playerNumber === 2) {
     opponentBoard = game.player1Grid;
-    clickedBoxBoard = game.player2ClickedBox;
+    solvedBoard = game.player2SolvedBoard;
   }
 
   for (let y = 0; y < rows; y++) {
@@ -298,7 +298,7 @@ function displayOpponentGrid() {
       fill("white");
       square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
 
-      if (clickedBoxBoard[y][x] === 1) {
+      if (solvedBoard[y][x] === 1) {
         let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
 
         if (nearbyBombs > 0) {
@@ -383,16 +383,16 @@ function mineSweep() {
   let y = Math.floor((mouseY - offsetY) / CELL_SIZE);
 
   let opponentBoard;
-  let clickedBoxBoard;
+  let solvedBoard;
 
   //find the board thst belongs to the opponent
   if (playerNumber === 1) {
     opponentBoard = game.player2Grid;
-    clickedBoxBoard = game.player1ClickedBox;
+    solvedBoard = game.player1SolvedBoard;
   } 
   else if (playerNumber === 2) {
     opponentBoard = game.player1Grid;
-    clickedBoxBoard = game.player2ClickedBox;
+    solvedBoard = game.player2SolvedBoard;
   }
   else {
     return;
@@ -408,7 +408,7 @@ function mineSweep() {
   }
 
   else {
-    clickedBoxBoard[y][x] = 1;
+    solvedBoard[y][x] = 1;
     let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
     console.log('cell is touching', nearbyBombs, 'bombs');
   }
