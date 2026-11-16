@@ -21,12 +21,11 @@ let playerNumber;
 let submitted = false;
 let currentPhase = 'placing';
 
-let offsetX;
-let offsetY;
 let bombsPlaced;
 
 async function setup() {
-  createCanvas(windowWidth, windowHeight);
+  let canvas = createCanvas(cols*CELL_SIZE, rows*CELL_SIZE);
+  canvas.parent("canvas-container");
 
   await partyConnect(
     "wss://demoserver.p5party.org",
@@ -69,8 +68,6 @@ async function setup() {
  
   
   bombCount = 10;
-  offsetX = (width - cols*CELL_SIZE)/2;
-  offsetY = (height - rows*CELL_SIZE)/2;
   
 }
 
@@ -164,13 +161,13 @@ function mousePressed() {
     return;
   }
 
-  if (mouseX > width/4 && mouseX < width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45 && bombsPlaced === bombCount) {
+  if (mouseX > 0 && mouseX < 150 && mouseY > 0 && mouseY < 45 && bombsPlaced === bombCount) {
     submitBoard();
     
     return;
   }
 
-  if (mouseX > width - width/4 && mouseX < width - width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45) {
+  if (mouseX > width - 150 && mouseX < width && mouseY > 0 && mouseY < 45) {
     if (bombMode === 'placing') {
       bombMode = 'removing';
     }
@@ -185,14 +182,14 @@ function mousePressed() {
 }
 
 function changeCell(bombMode) {
-  let x = Math.floor((mouseX - offsetX)/CELL_SIZE);
-  let y = Math.floor((mouseY - offsetY)/CELL_SIZE);
+  let x = Math.floor(mouseX/CELL_SIZE);
+  let y = Math.floor(mouseY/CELL_SIZE);
   let currentBoard;
 
   if (x<0 || x>=cols || y<0 || y>=rows) {
     return;
   }
-  if (mouseX > width - width/4 && mouseX < width - width/4 + 150 && mouseY > height/10 && mouseY < height/10 + 45) {
+  if (mouseX > width - 150 && mouseX < width && mouseY > 0 && mouseY < 45) {
     return;
   }
   
@@ -262,7 +259,7 @@ function displayOwnGrid() {
       else if (currentBoard[y][x] === 1) {
         fill('red');
       }
-      square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
+      square(x * CELL_SIZE,y * CELL_SIZE, CELL_SIZE);
     }
   }
 }
@@ -270,12 +267,12 @@ function displayOwnGrid() {
 function displaySubmitButton() {
   if (game) {
     fill("lightblue");
-    rect(width/4, height/10, 150, 45);
+    rect(0, 0, 150, 45);
   
     fill("black");
     textAlign(CENTER, CENTER);
     textSize(18);
-    text("Submit Board", width/4 + 70, height/10 + 25);
+    text("Submit Board", 70, 25);
   }
 }
 
@@ -296,14 +293,14 @@ function displayOpponentGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       fill("white");
-      square(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE);
+      square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
 
       if (solvedBoard[y][x] === 1) {
         let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
 
         if (nearbyBombs > 0) {
           fill("blue");
-          text(nearbyBombs, offsetX + x * CELL_SIZE + CELL_SIZE / 2, offsetY + y * CELL_SIZE + CELL_SIZE / 2);
+          text(nearbyBombs, x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2);
         }
       }
     }
@@ -339,12 +336,12 @@ function bombModeChecker() {
       fill('red');
       bombText = 'Remove bombs';
     }  
-    rect(width - width/4, height/10, 150, 45);
+    rect(width - 150, 0, 150, 45);
     
     fill("black");
     textAlign(CENTER, CENTER);
     textSize(18);
-    text(bombText, width - width/4 + 70, height/10 + 25);
+    text(bombText, width - 70, 25);
   }
 }
 
@@ -379,8 +376,8 @@ function stopWatchManager() {
 }
 
 function mineSweep() {
-  let x = Math.floor((mouseX - offsetX) / CELL_SIZE);
-  let y = Math.floor((mouseY - offsetY) / CELL_SIZE);
+  let x = Math.floor(mouseX/CELL_SIZE);
+  let y = Math.floor(mouseY/CELL_SIZE);
 
   let opponentBoard;
   let solvedBoard;
