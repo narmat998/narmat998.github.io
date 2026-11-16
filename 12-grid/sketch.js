@@ -10,9 +10,10 @@ let cols;
 let grid;
 
 async function setup() {
-  createCanvas(windowWidth, windowHeight);
-  rows = Math.floor(height/CELL_SIZE);
-  cols = Math.floor(height/CELL_SIZE);
+  rows = Math.floor(9);
+  cols = Math.floor(9);
+  let canvas = createCanvas(cols*CELL_SIZE, rows*CELL_SIZE);
+  canvas.parent("canvas-container");
   grid = generateRandomGrid(cols, rows);
 }
 
