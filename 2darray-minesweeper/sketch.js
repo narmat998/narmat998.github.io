@@ -149,7 +149,7 @@ function displayLobbyMenu() {
   fill(0);
   textSize(22);
   text("Create Lobby", width/2, 260);
-  
+   
   fill("lightblue");
   rect(width/2 - 125, 320, 250, 60);
   
