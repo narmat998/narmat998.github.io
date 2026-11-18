@@ -11,85 +11,225 @@ let rows = 9;
 let cols = 9;
 let grid;
 
-let bombCount;
-let bombMode = 'placing';
+let bombCount = 3;
+let bombMode = "placing";
 
 let me;
 let guests;
-let playerNumber;
+let playerNumber = -1;
+
+let lobbyCode = "";
+let lobbyJoined = false;
+let menuScreen = true;
+let joiningLobby = false;
+let lobbyStatus = "menu";
 
 let submitted = false;
-let currentPhase = 'placing';
+let currentPhase = "placing";
 
-let bombsPlaced;
+let bombsPlaced = 0;
+let lobbyInput;
 
-async function setup() {
-  let canvas = createCanvas(cols*CELL_SIZE, rows*CELL_SIZE);
+function setup() {
+  let canvas = createCanvas(cols * CELL_SIZE, rows * CELL_SIZE);
   canvas.parent("canvas-container");
 
-  await partyConnect(
-    "wss://demoserver.p5party.org",
-    "minesweeper_vs"
-  );
+  textAlign(CENTER, CENTER);
 
-  console.log('connected');
-
-  game = await partyLoadShared("game", {
-    player1Grid: generateRandomGrid(cols, rows),
-    player2Grid: generateRandomGrid(cols, rows),
-
-    player1Submitted: false,
-    player2Submitted: false,
-
-    player1BombsPlaced: 0,
-    player2BombsPlaced: 0,  
-
-    gameStarted: false,
-
-    stopwatchStartTime: 0,
-    elapsedTime: 0,
-    isRunning: false,
-
-    player1SolvedBoard: generateRandomGrid(cols, rows),
-    player2SolvedBoard: generateRandomGrid(cols, rows),
-  });
-
-  me = await partyLoadMyShared({
-    playerNumber: -1,
-    submitted: false,
-  });
-
-  guests = partyLoadGuestShareds();
-
-  console.log("Player 1 joined:", game.player1Joined);
-  console.log("Player 2 joined:", game.player2Joined);
-
-  console.log("game:", game);
- 
-  
-  bombCount = 10;
-  
+  lobbyInput = createInput("");
+  lobbyInput.parent("canvas-container");
+  lobbyInput.attribute("placeholder", "Enter 6-digit code");
+  lobbyInput.attribute("maxlength", "6");
+  lobbyInput.style("width", "180px");
+  lobbyInput.style("padding", "10px");
+  lobbyInput.hide();
 }
 
+function generateLobbyCode() {
+  return Math.floor(Math.random() * 900000) + 100000;
+}
+
+async function createLobby() {
+  if (joiningLobby || lobbyJoined) {
+    return;
+  }
+
+  lobbyCode = generateLobbyCode().toString();
+  await connectToLobby();
+}
+
+async function joinLobby(code) {
+  if (joiningLobby || lobbyJoined) {
+    return;
+  }
+  code = code.trim();
+
+  if (code > 100000 && code < 999999) {
+    lobbyCode = code;
+    await connectToLobby();
+  }
+  else {
+    lobbyStatus = "Incorrect lobby code";
+    return;
+  }
+}
+
+async function connectToLobby() {
+  joiningLobby = true;
+  lobbyStatus = "Connecting...";
+
+  try {
+    await partyConnect(
+      "wss://demoserver.p5party.org",
+      "minesweeper_vs",
+      lobbyCode
+    );
+
+    console.log("Connected to lobby:", lobbyCode);
+
+    game = await partyLoadShared("game", {
+      player1Grid: generateRandomGrid(cols, rows),
+      player2Grid: generateRandomGrid(cols, rows),
+
+      player1Submitted: false,
+      player2Submitted: false,
+
+      player1BombsPlaced: 0,
+      player2BombsPlaced: 0,
+
+      player1Joined: false,
+      player2Joined: false,
+
+      gameStarted: false,
+
+      stopwatchStartTime: 0,
+      elapsedTime: 0,
+      isRunning: false,
+      
+      player1SolvedBoard: generateRandomGrid(cols, rows),
+      player2SolvedBoard: generateRandomGrid(cols, rows)
+    });
+    
+    me = await partyLoadMyShared({
+      playerNumber: -1,
+      submitted: false
+    });
+    
+    guests = partyLoadGuestShareds();
+    
+    lobbyJoined = true;
+    menuScreen = false;
+    lobbyStatus = "Connected";
+    
+    lobbyInput.hide();
+    
+    console.log("Game:", game);
+  }
+  catch (error) {
+    console.error("Lobby connection failed:", error);
+    lobbyStatus = "Connection failed";
+  }
+  
+  joiningLobby = false;
+}
+
+function displayLobbyMenu() {
+  background(40);
+  
+  fill(255);
+  textAlign(CENTER, CENTER);
+  
+  textSize(40);
+  text("MINESWEEPER VS", width / 2, 150);
+  
+  fill("lightgreen");
+  rect(width / 2 - 125, 230, 250, 60);
+  
+  fill(0);
+  textSize(22);
+  text("Create Lobby", width / 2, 260);
+  
+  fill("lightblue");
+  rect(width / 2 - 125, 320, 250, 60);
+  
+  fill(0);
+  text("Join Lobby", width / 2, 350);
+  
+  fill(255);
+  textSize(16);
+  text(lobbyStatus, width / 2, 420);
+  
+  if (lobbyInput) {
+    lobbyInput.position(width/2 - 105, 700);
+    lobbyInput.show();
+  }
+}
+
+function displayWaitingRoom() {
+  background(40);
+
+  fill(255);
+  textAlign(CENTER, CENTER);
+
+  textSize(32);
+  text("YOUR LOBBY", width / 2, 120);
+
+  textSize(42);
+  fill("lightgreen");
+  text(lobbyCode, width / 2, 200);
+
+  textSize(20);
+  fill(255);
+
+  text("Player 1: " + (game.player1Joined ? "Connected" : "Waiting"), width/2, 300);
+
+  text("Player 2: " + (game.player2Joined ? "Connected" : "Waiting"), width / 2, 350);
+
+  if (game.player1Joined && game.player2Joined) {
+    fill("lightgreen");
+    text("Both players connected!", width / 2, 430);
+  }
+  else {
+    fill("yellow");
+    text("Waiting for opponent...", width / 2, 430);
+  }
+}
+
+
 function draw() {
+  if (menuScreen) {
+    displayLobbyMenu();
+    return;
+  }
+
+  if (!lobbyJoined || !game) {
+    background(40);
+    return;
+  }  
+
   background(255);
 
   managePlayers();
-  
-  stopWatchManager();
 
   if (playerNumber === -1) {
     textSize(18);
+    fill(0);
     text("Joining game...", width/2, height/2);
     return;
   }
-  
+
   if (playerNumber === 0) {
     textSize(18);
-    text("Game is full!", width/2, height/2);
+    fill(0);
+    text("Lobby is full!", width/2, height/2 );
     return;
   }
-  
+
+  if (!game.player1Joined || !game.player2Joined) {
+  displayWaitingRoom();
+  return;
+}
+
   if (game.gameStarted === true)  {
     currentPhase = 'solving';
   }
@@ -108,31 +248,39 @@ function draw() {
 }
 
 function managePlayers() {
+  if (!lobbyJoined || !game || !me)  {
+    return;
+  }
 
   if (partyIsHost()) {
     me.playerNumber = 1;
+    game.player1Joined = true;
 
-    //find the first guest
-    let player2 = guests.find(player => player.playerNumber === 2);
+    let player2 = guests.find(
+      player => player.playerNumber === 2
+    );
 
-    //find an unassigned guest
-    let unassigned = guests.find(player => player.playerNumber === -1);
+    if (!player2 && !game.gameStarted) {
+      let unassigned = guests.find(
+        player => player.playerNumber === -1
+      );
 
-    //assign player 2
-    if (!player2 && unassigned) {
-      unassigned.playerNumber = 2;
-    }
-
-    //set everyone else to be a spectator
-    for (let player of guests) {
-      if (player.playerNumber === -1) {
-        player.playerNumber = 0;
+      if (unassigned) {
+        unassigned.playerNumber = 2;
+        game.player2Joined = true;
+        console.log("Player 2 joined!");
       }
     }
-  }
-  //player number to 1
+
+    for (let player of guests) {
+      if (player.playerNumber === -1 && game.player2Joined) {
+        player.playerNumber = 0;
+        }
+      }
+    }
   playerNumber = me.playerNumber;
 }
+
 
 function generateRandomGrid(cols, rows) {
   let newGrid = [];
@@ -148,6 +296,25 @@ function generateRandomGrid(cols, rows) {
 
 
 function mousePressed() {
+  if (menuScreen) {
+    if (mouseX > width / 2 - 125 && mouseX < width / 2 + 125 && mouseY > 230 && mouseY < 290) {
+      createLobby();
+      return;
+    }
+
+    if (mouseX > width / 2 - 125 && mouseX < width / 2 + 125 && mouseY > 320 && mouseY < 380) {
+      let code = lobbyInput.value();
+      joinLobby(code);
+      return;
+    }
+
+    return;
+  }
+
+  if (!lobbyJoined || playerNumber < 1) {
+    return;
+  }
+
   if (currentPhase === "solving") {
     mineSweep();
     return;
@@ -292,7 +459,13 @@ function displayOpponentGrid() {
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      fill("white");
+      if (solvedBoard[y][x] === 1) {
+        fill("gray");
+      }
+      else if(solvedBoard[y][x] === 0){
+        fill("white");
+      }
+
       square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
 
       if (solvedBoard[y][x] === 1) {
