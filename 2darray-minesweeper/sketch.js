@@ -22,7 +22,7 @@ let lobbyCode = "";
 let lobbyJoined = false;
 let menuScreen = true;
 let joiningLobby = false;
-let lobbyStatus = "menu";
+let lobbyStatus = "";
 
 let submitted = false;
 let currentPhase = "placing";
@@ -36,11 +36,12 @@ function setup() {
 
   textAlign(CENTER, CENTER);
 
+  //make the lobby code input box
   lobbyInput = createInput("");
-  lobbyInput.parent("canvas-container");
   lobbyInput.attribute("placeholder", "Enter 6-digit code");
   lobbyInput.attribute("maxlength", "6");
   lobbyInput.style("width", "180px");
+  lobbyInput.position(windowWidth/2 - 100, height*3/4);
   lobbyInput.style("padding", "10px");
   lobbyInput.hide();
 }
@@ -81,7 +82,7 @@ async function connectToLobby() {
   try {
     await partyConnect(
       "wss://demoserver.p5party.org",
-      "minesweeper_vs",
+      "minesweeper_vs_making_this_long_so_james_won't_try_to_copy_it_to_mess_with_my_code",
       lobbyCode
     );
 
@@ -140,27 +141,26 @@ function displayLobbyMenu() {
   textAlign(CENTER, CENTER);
   
   textSize(40);
-  text("MINESWEEPER VS", width / 2, 150);
+  text("MINESWEEPER VS", width/2, 150);
   
   fill("lightgreen");
-  rect(width / 2 - 125, 230, 250, 60);
+  rect(width/2 - 125, 230, 250, 60);
   
   fill(0);
   textSize(22);
-  text("Create Lobby", width / 2, 260);
+  text("Create Lobby", width/2, 260);
   
   fill("lightblue");
-  rect(width / 2 - 125, 320, 250, 60);
+  rect(width/2 - 125, 320, 250, 60);
   
   fill(0);
-  text("Join Lobby", width / 2, 350);
+  text("Join Lobby", width/2, 350);
   
   fill(255);
   textSize(16);
-  text(lobbyStatus, width / 2, 420);
+  text(lobbyStatus, width/2, 420);
   
   if (lobbyInput) {
-    lobbyInput.position(width/2 - 105, 700);
     lobbyInput.show();
   }
 }
@@ -172,18 +172,18 @@ function displayWaitingRoom() {
   textAlign(CENTER, CENTER);
 
   textSize(32);
-  text("YOUR LOBBY", width / 2, 120);
+  text("Lobby Code:", width/2, 120);
 
   textSize(42);
   fill("lightgreen");
-  text(lobbyCode, width / 2, 200);
+  text(lobbyCode, width/2, 200);
 
   textSize(20);
   fill(255);
 
   text("Player 1: " + (game.player1Joined ? "Connected" : "Waiting"), width/2, 300);
 
-  text("Player 2: " + (game.player2Joined ? "Connected" : "Waiting"), width / 2, 350);
+  text("Player 2: " + (game.player2Joined ? "Connected" : "Waiting"), width /2, 350);
 
   if (game.player1Joined && game.player2Joined) {
     fill("lightgreen");
@@ -226,12 +226,13 @@ function draw() {
   }
 
   if (!game.player1Joined || !game.player2Joined) {
-  displayWaitingRoom();
-  return;
-}
+    displayWaitingRoom();
+    return;
+  }
 
   if (game.gameStarted === true)  {
     currentPhase = 'solving';
+    displayFlagClick();
   }
   
   if (currentPhase === 'placing') {
@@ -256,14 +257,10 @@ function managePlayers() {
     me.playerNumber = 1;
     game.player1Joined = true;
 
-    let player2 = guests.find(
-      player => player.playerNumber === 2
-    );
+    let player2 = guests.find(player => player.playerNumber === 2);
 
     if (!player2 && !game.gameStarted) {
-      let unassigned = guests.find(
-        player => player.playerNumber === -1
-      );
+      let unassigned = guests.find(player => player.playerNumber === -1);
 
       if (unassigned) {
         unassigned.playerNumber = 2;
@@ -275,9 +272,9 @@ function managePlayers() {
     for (let player of guests) {
       if (player.playerNumber === -1 && game.player2Joined) {
         player.playerNumber = 0;
-        }
       }
     }
+  }
   playerNumber = me.playerNumber;
 }
 
@@ -330,7 +327,6 @@ function mousePressed() {
 
   if (mouseX > 0 && mouseX < 150 && mouseY > 0 && mouseY < 45 && bombsPlaced === bombCount) {
     submitBoard();
-    
     return;
   }
 
@@ -342,9 +338,7 @@ function mousePressed() {
       bombMode = 'placing';
     }
   }
-
   changeCell(bombMode);
-
 
 }
 
@@ -532,9 +526,8 @@ function startGameTimer() {
 }
 
 function stopWatchManager() {
-  //host starts the stopwatch
+  //make host start stopwatch so no error with browser stuff
   if (partyIsHost()) {
-
     if (game.gameStarted && !game.isRunning) {
       game.stopwatchStartTime = Date.now();
       game.elapsedTime = 0;
@@ -611,4 +604,10 @@ function checkNearbyBombs(board, x, y) {
   }
 
   return bombTotal;
+}
+
+function displayFlagClick() {
+  if (game.gameStarted === true && currentPhase === "solving") {
+    
+  }
 }
