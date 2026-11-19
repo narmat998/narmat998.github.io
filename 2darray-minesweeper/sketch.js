@@ -82,7 +82,7 @@ async function connectToLobby() {
   try {
     await partyConnect(
       "wss://demoserver.p5party.org",
-      "minesweeper_vs_making_this_long_so_james_won't_try_to_copy_it_to_mess_with_my_code",
+      "minesweeper_vs_making_this_long_so_james_won't_try_to_copy_it_to_mess_with_my_code_IN_CASE_HE_REMEMBESR_THIS27124619461254126318263710298472",
       lobbyCode
     );
 
@@ -130,7 +130,6 @@ async function connectToLobby() {
     console.error("Lobby connection failed:", error);
     lobbyStatus = "Connection failed";
   }
-  
   joiningLobby = false;
 }
 
@@ -232,7 +231,6 @@ function draw() {
 
   if (game.gameStarted === true)  {
     currentPhase = 'solving';
-    displayFlagClick();
   }
   
   if (currentPhase === 'placing') {
@@ -243,6 +241,7 @@ function draw() {
   else if (currentPhase === 'solving') {
     displayOpponentGrid();
     startGameTimer();
+    displayFlagClick();
   }
 
   bombModeChecker();
@@ -313,9 +312,28 @@ function mousePressed() {
   }
 
   if (currentPhase === "solving") {
+    let clickMode = 'sweeping';
+    let clickModeText = 'sweeping';
+    let color;
+    if (game.gameStarted === true) {
+
+    if (mouseX > width/2 - 75 && mouseX < width/2 + 75 && mouseY > 0 && mouseY < 40) {
+      if (clickMode === 'sweeping') {
+        clickMode = 'flagging';
+        clickModeText = 'flagging';
+        color = fill('green');
+      }
+      if (clickMode === 'flagging') {
+        clickMode = 'sweeping';
+        clickModeText = 'sweeping';
+        color = fill('red');
+      }
+      displayFlagClick(clickModeText, color);
+    }
     mineSweep();
     return;
   }
+  
 
   console.log("Player number:", playerNumber);
   console.log("Mouse X:", mouseX);
@@ -340,6 +358,8 @@ function mousePressed() {
   }
   changeCell(bombMode);
 
+}
+}
 }
 
 function changeCell(bombMode) {
@@ -606,8 +626,9 @@ function checkNearbyBombs(board, x, y) {
   return bombTotal;
 }
 
-function displayFlagClick() {
-  if (game.gameStarted === true && currentPhase === "solving") {
-    
-  }
+function displayFlagClick(clickModeText, color) {   
+  rect(width/2 -75, 0, 150, 40);
+
+  fill(color);
+  text(clickModeText, width/2 - 50, 10);
 }
