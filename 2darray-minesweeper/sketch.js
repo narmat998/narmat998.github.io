@@ -30,6 +30,10 @@ let currentPhase = "placing";
 let bombsPlaced = 0;
 let lobbyInput;
 
+let clickMode = 'sweeping';
+let clickModeText = 'Sweeping';
+let clickModeColor = 'red';
+
 function setup() {
   let canvas = createCanvas(cols * CELL_SIZE, rows * CELL_SIZE);
   canvas.parent("canvas-container");
@@ -82,7 +86,7 @@ async function connectToLobby() {
   try {
     await partyConnect(
       "wss://demoserver.p5party.org",
-      "minesweeper_vs_making_this_long_so_james_won't_try_to_copy_it_to_mess_with_my_code_IN_CASE_HE_REMEMBESR_THIS27124619461254126318263710298472",
+      "minesweeper_vs",
       lobbyCode
     );
 
@@ -209,6 +213,7 @@ function draw() {
   background(255);
 
   managePlayers();
+  startGameTimer();
 
   if (playerNumber === -1) {
     textSize(18);
@@ -229,10 +234,13 @@ function draw() {
     return;
   }
 
-  if (game.gameStarted === true)  {
+  if (game.gameStarted === true) {
     currentPhase = 'solving';
   }
-  
+  else {
+    currentPhase = 'placing';
+  }
+ 
   if (currentPhase === 'placing') {
     displayOwnGrid();
     displaySubmitButton();
@@ -240,8 +248,8 @@ function draw() {
   
   else if (currentPhase === 'solving') {
     displayOpponentGrid();
-    startGameTimer();
     displayFlagClick();
+    stopWatchManager();
   }
 
   bombModeChecker();
@@ -255,7 +263,6 @@ function managePlayers() {
   if (partyIsHost()) {
     me.playerNumber = 1;
     game.player1Joined = true;
-
     let player2 = guests.find(player => player.playerNumber === 2);
 
     if (!player2 && !game.gameStarted) {
@@ -267,7 +274,7 @@ function managePlayers() {
         console.log("Player 2 joined!");
       }
     }
-
+    //dont let extra players in
     for (let player of guests) {
       if (player.playerNumber === -1 && game.player2Joined) {
         player.playerNumber = 0;
@@ -275,6 +282,7 @@ function managePlayers() {
     }
   }
   playerNumber = me.playerNumber;
+
 }
 
 
@@ -303,7 +311,6 @@ function mousePressed() {
       joinLobby(code);
       return;
     }
-
     return;
   }
 
@@ -311,55 +318,49 @@ function mousePressed() {
     return;
   }
 
+  //solving the girds
   if (currentPhase === "solving") {
-    let clickMode = 'sweeping';
-    let clickModeText = 'sweeping';
-    let color;
-    if (game.gameStarted === true) {
-
+    //toggle flagging and sweeping
     if (mouseX > width/2 - 75 && mouseX < width/2 + 75 && mouseY > 0 && mouseY < 40) {
       if (clickMode === 'sweeping') {
         clickMode = 'flagging';
-        clickModeText = 'flagging';
-        color = fill('green');
+        clickModeText = 'Flagging';
+        clickModeColor = 'green';
       }
-      if (clickMode === 'flagging') {
+      else if (clickMode === 'flagging') {
         clickMode = 'sweeping';
-        clickModeText = 'sweeping';
-        color = fill('red');
+        clickModeText = 'Sweeping';
+        clickModeColor = 'red';
       }
-      displayFlagClick(clickModeText, color);
+      return;
     }
     mineSweep();
     return;
   }
   
-
-  console.log("Player number:", playerNumber);
-  console.log("Mouse X:", mouseX);
-  console.log("Mouse Y:", mouseY);
-
-  if (currentPhase !== "placing" || submitted) {
-    return;
-  }
-
-  if (mouseX > 0 && mouseX < 150 && mouseY > 0 && mouseY < 45 && bombsPlaced === bombCount) {
-    submitBoard();
-    return;
-  }
-
-  if (mouseX > width - 150 && mouseX < width && mouseY > 0 && mouseY < 45) {
-    if (bombMode === 'placing') {
-      bombMode = 'removing';
+  //if placing bombs
+  if (currentPhase === 'placing') {
+    if (submitted === true) {      
+      return;
     }
-    else if (bombMode === 'removing') {
-      bombMode = 'placing';
+
+    if (mouseX > 0 && mouseX < 150 && mouseY > 0 && mouseY < 45 && bombsPlaced === bombCount) {
+      submitBoard();
+      return;
     }
-  }
+
+    //toggle placing and removing
+    if (mouseX > width - 150 && mouseX < width && mouseY > 0 && mouseY < 45) {
+      if (bombMode === 'placing') {
+        bombMode = 'removing';
+      }
+      else {
+        bombMode = 'placing';
+      }
+      return;
+    }
   changeCell(bombMode);
-
-}
-}
+  }
 }
 
 function changeCell(bombMode) {
@@ -586,14 +587,31 @@ function mineSweep() {
     return;
   }
 
-  if (opponentBoard[y][x] === 1) {
-    console.log("bomb");
+  //flagging
+  if (clickMode === 'flagging') {
+    if (solvedBoard[y][x] === 0) {
+      solvedBoard[y][x] = 2;
+    }
+    else if (solvedBoard[y][x] === 2) {
+      solvedBoard[y][x] = 0;
+    }
+    return;
   }
 
-  else {
+
+  //sweeping
+  if (clickMode === 'sweeping') {
+    if (solvedBoard[y][x] === 2) {
+      return;
+    }
+    if (opponentBoard[y][x] === 1) {
+      console.log("bomb");
+    }
+    else {
     solvedBoard[y][x] = 1;
     let nearbyBombs = checkNearbyBombs(opponentBoard, x, y);
     console.log('cell is touching', nearbyBombs, 'bombs');
+    }
   }
 }
 
@@ -626,9 +644,12 @@ function checkNearbyBombs(board, x, y) {
   return bombTotal;
 }
 
-function displayFlagClick(clickModeText, color) {   
-  rect(width/2 -75, 0, 150, 40);
+function displayFlagClick() {
+  fill(clickModeColor);
+  rect(width/2 - 75, 0, 150, 40);
 
-  fill(color);
-  text(clickModeText, width/2 - 50, 10);
+  fill(255);
+  textSize(18);
+  textAlign(CENTER, CENTER);
+  text(clickModeText, width/2, 20);
 }
