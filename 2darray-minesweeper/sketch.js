@@ -362,8 +362,8 @@ function mousePressed() {
     }
     //try to join a lobby using the code in the lobby input if the click is in the area of the join lobby rectangle
     if (mouseX > width / 2 - 125 && mouseX < width / 2 + 125 && mouseY > 320 && mouseY < 380) {
-      let code = lobbyInput.value();
-      joinLobby(code);
+      let lobbyCode = lobbyInput.value();
+      joinLobby(lobbyCode);
       return;
     }
     return;
