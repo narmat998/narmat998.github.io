@@ -238,7 +238,7 @@ function mousePressed() {
       turn = 'blue';
     }
   }
-}
+} 
 
 function fireShell(tank) {
   let angle = tank.angle + tank.barrelAngle;
