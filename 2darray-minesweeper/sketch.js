@@ -725,9 +725,8 @@ function checkNearbyBombs(board, x, y) {
       let checkY = y + yOffset;
       
       //if cell on edge
-      if (checkX >= 0 && checkX < cols &&
-        checkY >= 0 && checkY < rows) {
-          
+      if (checkX >= 0 && checkX < cols && checkY >= 0 && checkY < rows) {
+          //if one of the cells surrounding it has a bomb add that to the bomb total
           if (board[checkY][checkX] === 1) {
             bombTotal++;
           }
@@ -741,26 +740,29 @@ function checkNearbyBombs(board, x, y) {
 function revealCells(opponentBoard, solvedBoard, startX, startY) {
   let surroundingCells = [[startX, startY]];
 
+  //run as long as there are still unchecked coordinates in the surroundingCells array
   while (surroundingCells.length > 0) {
+    //check the last coordinates
     let [x, y] = surroundingCells.pop();
 
-    //if outside the grid ignore the cell
+    //check if outside the grid then ignore the cell
     if (x < 0 || x >= cols || y < 0 || y >= rows) {
       continue;
     }
 
-    //don't reveal cells that are already revealed, flagged, or bombs
+    //check if its a revealed cell or flagged cell or a bomb
     if (solvedBoard[y][x] !== 0 || opponentBoard[y][x] === 1) {
       continue;
     }
     //make it a revealed cell
     solvedBoard[y][x] = 1;
 
-    //spread outward from cells with no nearby bombs
+    //check if a cell is touching bombs, if it isnt keep spreading until it finds a cell that is touching bombs
     if (checkNearbyBombs(opponentBoard, x, y) === 0) {
       for (let yOffset = -1; yOffset <= 1; yOffset++) {
         for (let xOffset = -1; xOffset <= 1; xOffset++) {
           if (xOffset !== 0 || yOffset !== 0) {
+            //add neighbouring cells to the surroundingCells array
             surroundingCells.push([x + xOffset, y + yOffset]);
           }
         }
