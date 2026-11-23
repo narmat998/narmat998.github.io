@@ -16,7 +16,8 @@
 - [Life-Game](13-life)
 - [Grid-Character](14-character)
 - [setTimeout](16-set-timeout)
--[setInterval](15-set-interval)
+- [setInterval](15-set-interval)
+- [walker oop](17-walker)
 
 ## Projects
 - [Interactive Scene](scene)

@@ -62,8 +62,8 @@ async function setup() {
   bombImage = await loadImage('bomb.png');
   flagImage = await loadImage('flag.png');
   explosionNoise = await loadSound('8bit_bomb_explosion.wav');
-  winNoise = await loadSound('win_sound_1.wav')
-  backgroundMusic = await createAudio('chrome_music_lab_midi_loop.wav')
+  winNoise = await loadSound('win_sound_1.wav');
+  backgroundMusic = createAudio('chrome_music_lab_midi_loop.wav');
 
   let canvas = createCanvas(cols * CELL_SIZE, rows * CELL_SIZE);
   canvas.parent('canvas-container');
@@ -269,8 +269,8 @@ function draw() {
 
   if (playerNumber === 0) {
     //if both players have joined the lobby, show a lobby is full screen to extra people 
-    background(40)
-    textAlign(CENTER, CENTER)
+    background(40);
+    textAlign(CENTER, CENTER);
     textSize(30);
     fill('white');
     text('Lobby is full', width/2, height/2);
@@ -355,7 +355,7 @@ function managePlayers() {
 
 function playBackgroundMusic() {
   //play the background music and loop it
-    if (game.player1Joined && game.player2Joined) {
+  if (game.player1Joined && game.player2Joined) {
     backgroundMusic.volume(0.1);
     backgroundMusic.play();
     backgroundMusic.loop();
@@ -440,7 +440,7 @@ function mousePressed() {
       }
       return;
     }
-  changeCell(bombMode);
+    changeCell(bombMode);
   }
 }
 
@@ -726,13 +726,13 @@ function checkNearbyBombs(board, x, y) {
       
       //if cell on edge
       if (checkX >= 0 && checkX < cols && checkY >= 0 && checkY < rows) {
-          //if one of the cells surrounding it has a bomb add that to the bomb total
-          if (board[checkY][checkX] === 1) {
-            bombTotal++;
-          }
+        //if one of the cells surrounding it has a bomb add that to the bomb total
+        if (board[checkY][checkX] === 1) {
+          bombTotal++;
         }
       }
     }
+  }
   return bombTotal;
 }
 
@@ -798,7 +798,10 @@ function stopWatchManager() {
   
 function displayStopwatch() {
   //show the stopwatch in the corner
-  if (localStart === 0) return;
+  if (localStart === 0) {
+    return;
+  }
+  
   let seconds = ((millis() - localStart) / 1000).toFixed(1);
 
   fill('white');
@@ -837,15 +840,15 @@ function checkWinner() {
         let bomb = opponentBoard[y][x] === 1;
         let flag = solvedBoard[y][x] === 2;
 
-      //if there are flags on non bomb cells return false,
+        //if there are flags on non bomb cells return false,
         if (bomb !== flag) {
           return false;
         }
       }
     }
     //if all the bombs are flagged set the winner to be the player and save the final time
-  game.winner = playerNumber;
-  game.finalTime = (millis()-localStart)/ 1000;
+    game.winner = playerNumber;
+    game.finalTime = (millis()-localStart)/ 1000;
   }
 }
 
