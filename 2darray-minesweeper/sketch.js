@@ -911,3 +911,13 @@ function updateExplosions() {
     }
   }
 }
+
+
+//when trying to connect I alwasys instinctively pressed enter so I thought it'd be best to add that as well
+function keyPressed() {
+  if (key === ENTER) {
+    let lobbyCode = lobbyInput.value();
+    joinLobby(lobbyCode);
+    return;
+  }
+}
