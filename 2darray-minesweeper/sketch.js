@@ -11,6 +11,7 @@
 //I also referenced https://yay-inc.github.io/world/ on how to use p5party and the p5party library on how to assign players
 //I left some of my debugging console messages just to make sure the player assignments work properly 
 //I used basically the exact same 2d Array code that we used for the in class demo to make the base grid that can be altered by other functions
+//I made the bomb and flag sprites and found the sound effects on opengameart, I made the background music in the chrome music lab website
 let game = {};
 
 const CELL_SIZE = 100;
@@ -48,8 +49,22 @@ let clickMode = 'sweeping';
 let clickModeText = 'Sweeping';
 let clickModeColor = 'red';
 
+let bombImage;
+let flagImage;
 
-function setup() {
+let explosionNoise;
+let winNoise;
+let backgroundMusic;
+
+let winSoundPlayed = false;
+
+async function setup() {
+  bombImage = await loadImage('bomb.png');
+  flagImage = await loadImage('flag.png');
+  explosionNoise = await loadSound('8bit_bomb_explosion.wav');
+  winNoise = await loadSound('win_sound_1.wav')
+  backgroundMusic = await createAudio('chrome_music_lab_midi_loop.wav')
+
   let canvas = createCanvas(cols * CELL_SIZE, rows * CELL_SIZE);
   canvas.parent('canvas-container');
 
@@ -65,22 +80,18 @@ function setup() {
   lobbyInput.hide();
 }
 
-
-function generateLobbyCode() {
-  return Math.floor(Math.random() * 900000) + 100000;
-}
-
-
+//make a lobby with a randomised code and load the shared data
 async function createLobby() {
   if (joiningLobby || lobbyJoined) {
     return;
   }
 
-  lobbyCode = generateLobbyCode().toString();
+  lobbyCode = (Math.floor(Math.random() * 900000) + 100000).toString();
   await connectToLobby();
 }
 
 
+//try the code from the lobby input, if its a 6 digit number
 async function joinLobby(code) {
   if (joiningLobby || lobbyJoined) {
     return;
@@ -97,7 +108,7 @@ async function joinLobby(code) {
   }
 }
 
-
+//share all the shared data 
 async function connectToLobby() {
   joiningLobby = true;
   lobbyStatus = 'Connecting...';
@@ -296,6 +307,9 @@ function draw() {
 
   //toggle between placing and removing bombs
   bombModeChecker();
+
+  //play the background music
+  playBackgroundMusic();
 }
 
 
@@ -336,6 +350,16 @@ function managePlayers() {
   }
   //assign the local player number
   playerNumber = me.playerNumber;
+}
+
+
+function playBackgroundMusic() {
+  //play the background music and loop it
+    if (game.player1Joined && game.player2Joined) {
+    backgroundMusic.volume(0.1);
+    backgroundMusic.play();
+    backgroundMusic.loop();
+  }
 }
 
 
@@ -489,7 +513,7 @@ function displayOwnGrid() {
     currentBoard = game.player2Grid;
   }
 
-  //if the cell is a bomb make it red, if not make it white
+  //if the cell is a bomb make it a bomb, if not make it white
   for (let y = 0; y < rows; y++) {
     if (!currentBoard[y]) {
       continue;
@@ -497,11 +521,13 @@ function displayOwnGrid() {
     for (let x = 0; x < cols; x++) {
       if (currentBoard[y][x] === 0) {
         fill('white');
+        square(x * CELL_SIZE,y * CELL_SIZE, CELL_SIZE);
       }
       else if (currentBoard[y][x] === 1) {
-        fill('red');
+        fill('white');
+        square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
+        image(bombImage, x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
-      square(x * CELL_SIZE,y * CELL_SIZE, CELL_SIZE);
     }
   }
 }
@@ -536,20 +562,20 @@ function displayOpponentGrid() {
     solvedBoard = game.player2SolvedBoard;
   }
 
-  //if you have clicked the square make it gray, if it is unclicked make it white, if it is flagged make it orange.
+  //if you have clicked the square make it grey, otherwise make it white (so the flag can also go on top of it), if it is flagged show the flag image
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (solvedBoard[y][x] === 1) {
-        fill('gray');
+        fill('grey');
       }
-      else if(solvedBoard[y][x] === 0){
+      else {
         fill('white');
       }
-      else if(solvedBoard[y][x] === 2) {
-        fill('orange');
-      }
-
       square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
+
+      if(solvedBoard[y][x] === 2) {
+        image(flagImage, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
 
       //if the cell is clicked, check the nearby bombs, and say how many are nearby
       if (solvedBoard[y][x] === 1) {
@@ -817,6 +843,12 @@ function checkWinner() {
 
 
 function endGame(winningPlayer) {
+  //play the win sound effect one time
+  if (!winSoundPlayed) {
+    winNoise.play();
+    winSoundPlayed = true;
+  }
+
   //show the end screen with the winner and their time
   background(40);
 
@@ -830,16 +862,21 @@ function endGame(winningPlayer) {
 
 
 function explode(x, y) {
+  //end the background music
+  backgroundMusic.stop();
+  //play the bomb exploding sound effect
+  explosionNoise.play();
+
   let explosionX = x * CELL_SIZE + CELL_SIZE / 2;
   let explosionY = y * CELL_SIZE + CELL_SIZE / 2;
-  //make `100 circles that operate like bomb fragments
+  //make `100 squares that operate like bomb fragments
   for (let i = 0; i < 50; i++) {
     explosions.push({
       x: explosionX,
       y: explosionY,
       velocityX: random(-10, 10),
       velocityY: random(-10, 10),
-      radius: random(3, 40),
+      width: random(3, 40),
       life: 60,
     });
   }
@@ -855,10 +892,10 @@ function updateExplosions() {
     fragment.y += fragment.velocityY;
     fragment.life-- ;
 
-    //randomly colour the circles
-    fill(random(0, 255), random(0, 255), random(0, 255));
+    //randomly colour the squares in a reddish spectrum
+    fill(random(150, 255), random(0, 60), random(0, 60));
     noStroke();
-    circle(fragment.x, fragment.y, fragment.radius * fragment.life /60);
+    square(fragment.x, fragment.y, fragment.width * fragment.life /60);
 
     //if the fragment has existed for its lifespan get rid of it
     if (fragment.life <= 0) {
