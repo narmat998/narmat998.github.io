@@ -393,6 +393,11 @@ function mousePressed() {
     return;
   }
 
+  //fix for issue where you could still click on bombs during end screen
+  if (game.winner !== 0) {
+    return;
+  }
+
   //solving the grid
   if (currentPhase === 'solving') {
     //toggle flagging and sweeping if you click in the area of the "button"
@@ -639,6 +644,7 @@ function mineSweep() {
   let opponentBoard;
   let solvedBoard;
   
+
   //find the board thst belongs to the opponent
   if (playerNumber === 1) {
     opponentBoard = game.player2Grid;
@@ -843,6 +849,8 @@ function checkWinner() {
 
 
 function endGame(winningPlayer) {
+  //end the background music
+  backgroundMusic.stop();
   //play the win sound effect one time
   if (!winSoundPlayed) {
     winNoise.play();
