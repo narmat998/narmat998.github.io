@@ -32,23 +32,33 @@ class Walker{
   }
 }
 
-let dudes = [];
+let walkers = [];
 
+let walk = true;
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
-  for (i=0; i < 101; i++) {
-    let dude;
-    dude = new Walker(random(width), random(height), color(random(255), random(255), random(255)));
-
-    dudes.push(dude);
-  }
   noStroke();
 }
 
 function draw() {
-  for (let i=0; i< dudes.length; i++) {
-    dudes[i].move();
-    dudes[i].display();
+  for (let i=0; i<walkers.length; i++) {
+    if (walk === true) {
+      walkers[i].move();
+      walkers[i].display();
+    }
   }
+
+  spawnWalker();
+}
+
+function mousePressed() {
+  walk = !walk;
+}
+
+function spawnWalker() {
+  let someWalker = new Walker(mouseX, mouseY, color(random(255), random(255), random(255)));
+  
+  walkers.push(someWalker);
+  
 }
