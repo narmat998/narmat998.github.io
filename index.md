@@ -18,6 +18,7 @@
 - [setTimeout](16-set-timeout)
 - [setInterval](15-set-interval)
 - [walker oop](17-walker)
+- [fireworks](18-fireworks)
 
 ## Projects
 - [Interactive Scene](scene)
